@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText, KeyRound, Network } from "lucide-react";
+import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
@@ -22,7 +22,6 @@ const EVAL_ICONS: Record<string, React.ElementType> = {
   credentials: KeyRound,
   compatibility: Puzzle,
   quality: Sparkles,
-  networkEgress: Network,
 };
 
 const SkillDetail = () => {

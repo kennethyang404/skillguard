@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Skill, SkillStatus } from "@/lib/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Shield, Puzzle, Sparkles, Check, X, KeyRound, Network } from "lucide-react";
+import { Shield, Puzzle, Sparkles, Check, X, KeyRound } from "lucide-react";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
 
 const statusColors: Record<string, string> = {
@@ -26,7 +26,6 @@ const EVAL_ICONS: Record<string, React.ElementType> = {
   credentials: KeyRound,
   compatibility: Puzzle,
   quality: Sparkles,
-  networkEgress: Network,
 };
 
 const AdminDashboard = () => {

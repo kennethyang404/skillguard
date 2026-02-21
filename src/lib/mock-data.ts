@@ -128,11 +128,6 @@ Message context lines include \`slack message id\` and \`channel\` fields you ca
         explanation:
           "Well-defined action groups with clear JSON payloads. Scope is limited to Slack operations. Does not ask to read local files or unrelated env vars. Could improve by documenting required permissions and scopes for the bot token.",
       },
-      networkEgress: {
-        score: 75,
-        explanation:
-          "All actions go through the Slack API via the configured bot token. Endpoints are implicit (Slack API) rather than explicitly documented. No outbound data uploads beyond Slack actions. The undeclared bot token dependency means network behavior is partially opaque.",
-      },
       summary:
         "Functional Slack integration with well-structured actions, but fails to declare two important runtime dependencies: the 'slack' CLI/tool and the Slack bot token. Verify token origin and scope before installing.",
     },
@@ -244,11 +239,6 @@ DELETE /youtube/youtube/v3/comments?id={commentId}
         explanation:
           "Comprehensive API reference covering search, videos, channels, playlists, subscriptions, and comments. Clear examples in both Python and bash. Well-documented error handling and troubleshooting. Connection management workflow is clear.",
       },
-      networkEgress: {
-        score: 78,
-        explanation:
-          "All outbound calls go to gateway.maton.ai and ctrl.maton.ai (documented). Both download and upload operations are present (GET for reads, POST/PUT/DELETE for writes). Data sent includes YouTube API payloads proxied through Maton. The Maton service stores OAuth tokens — review their privacy policy.",
-      },
       summary:
         "Internally consistent YouTube API proxy via Maton. Single API key is proportionate. Before installing, verify you trust Maton (maton.ai) and review how they store OAuth tokens. Limit Google OAuth scopes when connecting.",
     },
@@ -316,11 +306,6 @@ Use \`gog\` for Gmail/Calendar/Drive/Contacts/Sheets/Docs. Requires OAuth setup.
         score: 78,
         explanation:
           "Comprehensive command reference covering all Google Workspace services. Clear setup instructions. However, lacks error handling documentation and doesn't explain what happens with malformed inputs. Confirms before destructive actions (good).",
-      },
-      networkEgress: {
-        score: 70,
-        explanation:
-          "The gog CLI communicates with Google APIs (googleapis.com) using OAuth tokens stored locally. Endpoints are implicit — not explicitly listed in SKILL.md. Data sent includes email content, calendar events, drive files. No documentation on what data leaves the system or telemetry behavior of the CLI binary.",
       },
       summary:
         "Promising Google Workspace CLI wrapper but has significant gaps: registry/SKILL.md metadata mismatch on required binaries, undeclared OAuth credential requirements, and incomplete network egress documentation. Verify the Homebrew tap source and only provide OAuth credentials from a test account.",
@@ -408,11 +393,6 @@ Docs: [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs)`,
         explanation:
           "Clear, concise instructions with practical examples. Provides both human-readable (wttr.in) and machine-readable (Open-Meteo) options. Format codes are well-documented. Scope is well-defined and narrow.",
       },
-      networkEgress: {
-        score: 93,
-        explanation:
-          "All outbound calls are download-only (HTTP GET) to two documented endpoints: wttr.in and api.open-meteo.com. No data upload, no POST/PUT requests. The only data sent is the location query string. No telemetry or analytics. Fully transparent.",
-      },
       summary:
         "Exemplary low-risk skill. No credentials, no installs, read-only network access to well-known public APIs. Safe for enterprise use. Only consideration: queried locations are sent to external services (wttr.in, Open-Meteo).",
     },
@@ -495,11 +475,6 @@ Optional services:
         score: 85,
         explanation:
           "Clear quick-start examples, well-documented flags and model options. Config file support for customization. Scope is well-defined: summarize URLs/files/YouTube. Good fallback strategy with Firecrawl and Apify.",
-      },
-      networkEgress: {
-        score: 68,
-        explanation:
-          "The CLI sends file/URL content to whichever LLM provider is configured (OpenAI, Anthropic, Google, xAI). Optional Firecrawl and Apify services receive URLs/content. Multiple external services may receive data but endpoints are documented. Full content of summarized files is transmitted externally.",
       },
       summary:
         "Useful content summarization wrapper with clear documentation. Multiple LLM provider support is well-designed. Main concerns: third-party binary installation, content sent to external LLM providers, and metadata mismatch on required binaries. Only use with provider API keys you trust.",
@@ -592,11 +567,6 @@ Use the frameworks below to craft content modeled after successful examples.
         score: 82,
         explanation:
           "Well-structured content creation methodology with clear frameworks and templates. Research-first approach is good practice. However, outputs may closely paraphrase public tweets — review for copyright. The skill doesn't include posting capability (good separation of concerns).",
-      },
-      networkEgress: {
-        score: 96,
-        explanation:
-          "No outbound network calls from the skill itself. Only uses the platform's built-in WebSearch tool for research. No data uploads, no webhooks, no telemetry. All content generation is local to the agent.",
       },
       summary:
         "Excellent low-risk skill. Instruction-only, no credentials, no installs, no network egress. Safe for enterprise use. Only consideration: review generated content for copyright/attribution before publishing.",
@@ -709,11 +679,6 @@ DELETE /outlook/v1.0/me/contacts/{contactId}
         score: 86,
         explanation:
           "Clean API reference covering mail, calendar, and contacts. OData query parameter documentation is helpful. Connection management is clear. Could improve by documenting what Microsoft Graph scopes are requested during OAuth.",
-      },
-      networkEgress: {
-        score: 75,
-        explanation:
-          "All outbound calls go to gateway.maton.ai and ctrl.maton.ai (documented). Both download and upload operations: GET for reads, POST for sending emails, creating events. Email content and calendar data are transmitted through Maton's proxy. Maton stores OAuth tokens — review their privacy/security policy.",
       },
       summary:
         "Internally consistent Microsoft Graph proxy via Maton. Single API key is proportionate. Key concern: sensitive email/calendar data routes through a third-party service. Verify Maton's privacy policy and limit OAuth scopes. Consider disabling autonomous model invocation to prevent unattended email access.",
@@ -904,11 +869,6 @@ if __name__ == "__main__":
         score: 90,
         explanation:
           "Well-designed type system with clear constraints, validation, and schema enforcement. Append-only JSONL storage provides auditability. Skill contract pattern for cross-skill communication is thoughtful. Good separation of concerns.",
-      },
-      networkEgress: {
-        score: 97,
-        explanation:
-          "Purely local operation. No outbound network calls whatsoever. All data stays in the local filesystem (memory/ontology/graph.jsonl). No telemetry, no webhooks, no analytics. Fully offline-capable.",
       },
       summary:
         "High-quality, low-risk knowledge graph skill with excellent security posture. No credentials, no network access, append-only local storage. Only recommendation: review path handling in the full scripts/ontology.py for directory traversal prevention, and consider access controls if multiple skills read the ontology.",

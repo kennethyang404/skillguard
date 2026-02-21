@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { getScore, EVALUATION_KEYS } from "@/lib/types";
 import type { EvaluationScores } from "@/lib/types";
 import {
-  Shield, Puzzle, Sparkles, FileSearch, Binary, Network,
+  Shield, Puzzle, Sparkles, FileSearch, Binary,
   CheckCircle2, Loader2, Clock, ChevronRight, Circle, XCircle,
   KeyRound,
 } from "lucide-react";
@@ -84,19 +84,6 @@ const PIPELINE_STEPS: PipelineStep[] = [
       "Assessing auditability & safe defaults",
     ],
     durationMs: 2400,
-  },
-  {
-    id: "networkEgress",
-    label: "Network Egress & Data Disclosure",
-    sublabel: "Outbound traffic analysis",
-    icon: Network,
-    subSteps: [
-      "Enumerating outbound network actions",
-      "Classifying download vs upload vs RCE",
-      "Checking documentation alignment",
-      "Flagging undisclosed data transmission",
-    ],
-    durationMs: 2000,
   },
   {
     id: "report",
