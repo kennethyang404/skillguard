@@ -14,7 +14,16 @@ export function SkillCard({ skill }: { skill: Skill }) {
   const handleInstall = (e: React.MouseEvent) => {
     e.preventDefault();
     incrementDownloads(skill.id);
-    toast.success(`"${skill.title}" installed successfully.`);
+    const blob = new Blob([skill.markdownContent], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${skill.title.replace(/\s+/g, "-").toLowerCase()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`"${skill.title}" downloaded successfully.`);
   };
 
   return (
