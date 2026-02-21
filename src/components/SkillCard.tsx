@@ -6,6 +6,7 @@ import { Skill } from "@/lib/types";
 import { useSkills } from "@/lib/skills-store";
 import { Download, Star } from "lucide-react";
 import { toast } from "sonner";
+import { EvaluationPipeline } from "@/components/EvaluationPipeline";
 
 export function SkillCard({ skill }: { skill: Skill }) {
   const { incrementDownloads } = useSkills();
@@ -39,6 +40,7 @@ export function SkillCard({ skill }: { skill: Skill }) {
               </Badge>
             ))}
           </div>
+          <EvaluationPipeline scores={skill.evaluationScores} status={skill.status} variant="compact" />
         </CardContent>
         <CardFooter className="flex items-center justify-between pt-0">
           <div className="flex items-center gap-3 text-xs text-muted-foreground">

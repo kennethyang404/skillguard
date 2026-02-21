@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { EvaluationPipeline } from "@/components/EvaluationPipeline";
 
 const statusColors: Record<string, string> = {
   approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -103,17 +104,27 @@ const SkillDetail = () => {
             </CardContent>
           </Card>
 
+          {/* Evaluation Pipeline Visualization */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Evaluation Report
+                  <FileText className="h-4 w-4" /> Evaluation Pipeline
                 </CardTitle>
                 <span className={`text-lg font-bold ${overallColor}`}>{overallScore}/100</span>
               </div>
             </CardHeader>
+            <CardContent>
+              <EvaluationPipeline scores={skill.evaluationScores} status={skill.status} variant="full" />
+            </CardContent>
+          </Card>
+
+          {/* Detailed Scores */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Score Breakdown</CardTitle>
+            </CardHeader>
             <CardContent className="space-y-5">
-              {/* Summary */}
               {skill.evaluationScores.summary && (
                 <>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -122,8 +133,6 @@ const SkillDetail = () => {
                   <Separator />
                 </>
               )}
-
-              {/* Per-category breakdown */}
               {evalItems.map((item) => {
                 const Icon = item.icon;
                 const score = getScore(item.val);
