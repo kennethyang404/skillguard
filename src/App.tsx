@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SkillsProvider, useSkills } from "@/lib/skills-store";
 import { Layout } from "@/components/Layout";
+import LandingPage from "./pages/LandingPage";
 import Marketplace from "./pages/Marketplace";
 import SkillDetail from "./pages/SkillDetail";
 import SubmissionPortal from "./pages/SubmissionPortal";
@@ -27,7 +28,8 @@ const App = () => (
         <SkillsProvider>
           <Layout>
             <Routes>
-              <Route path="/" element={<Marketplace />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/skill/:id" element={<SkillDetail />} />
               <Route path="/submit" element={<SubmissionPortal />} />
               <Route path="/admin" element={<AdminGuard />} />

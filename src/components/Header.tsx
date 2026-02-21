@@ -9,7 +9,8 @@ export function Header() {
   const navigate = useNavigate();
 
   const navItems = [
-    { to: "/", label: "Marketplace", icon: Package },
+    { to: "/", label: "Home", icon: Shield },
+    { to: "/marketplace", label: "Marketplace", icon: Package },
     { to: "/submit", label: "Submit Skill", icon: Upload },
   ];
 
