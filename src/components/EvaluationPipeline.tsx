@@ -252,6 +252,14 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
   const [stepStartTimes, setStepStartTimes] = useState<Record<number, number>>({});
   const logRef = useRef<HTMLDivElement>(null);
 
+  // When status changes (e.g. pending → rejected), recalculate step results
+  useEffect(() => {
+    if (!isPending) {
+      setStepStatuses(PIPELINE_STEPS.map((step) => getStepResult(step.id)));
+      setActiveSubStepIdx({});
+    }
+  }, [isPending, scores]);
+
   useEffect(() => {
     if (!isPending) {
       const completed = PIPELINE_STEPS.flatMap((step) => [
