@@ -33,7 +33,16 @@ const SkillDetail = () => {
 
   const handleInstall = () => {
     incrementDownloads(skill.id);
-    toast.success(`"${skill.title}" installed successfully.`);
+    const blob = new Blob([skill.markdownContent], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${skill.title.replace(/\s+/g, "-").toLowerCase()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`"${skill.title}" downloaded successfully.`);
   };
 
   const evalItems = [
@@ -129,6 +138,8 @@ const SkillDetail = () => {
 
         {/* Sidebar */}
         <div className="space-y-4">
+          {/* Spacer to align with score breakdown */}
+          <div className="hidden lg:block h-[4.5rem]" />
           <Card>
             <CardContent className="pt-6 space-y-4">
               <Button className="w-full" onClick={handleInstall}>
