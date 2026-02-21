@@ -26,7 +26,7 @@ const SkillDetail = () => {
     return (
       <div className="text-center py-16">
         <p className="text-muted-foreground">Skill not found.</p>
-        <Link to="/" className="text-primary underline mt-2 inline-block">Back to marketplace</Link>
+        <Link to="/marketplace" className="text-primary underline mt-2 inline-block">Back to marketplace</Link>
       </div>
     );
   }
@@ -58,7 +58,7 @@ const SkillDetail = () => {
 
   return (
     <div>
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <Link to="/marketplace" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to marketplace
       </Link>
 
