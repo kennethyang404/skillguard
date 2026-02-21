@@ -227,8 +227,25 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
   const isPending = status === "pending";
   const isRejected = status === "rejected";
 
+  // Map pipeline step ids to score keys to determine pass/fail
+  const STEP_SCORE_KEY: Record<string, keyof Omit<EvaluationScores, "summary"> | null> = {
+    parse: null,
+    security: "security",
+    credentials: "credentials",
+    compatibility: "compatibility",
+    quality: "quality",
+    report: null,
+  };
+
+  const getStepResult = (stepId: string): StepStatus => {
+    const key = STEP_SCORE_KEY[stepId];
+    if (!key) return "complete";
+    const score = getScore(scores[key]);
+    return score < 80 ? "failed" : "complete";
+  };
+
   const [stepStatuses, setStepStatuses] = useState<StepStatus[]>(
-    isPending ? PIPELINE_STEPS.map(() => "pending") : PIPELINE_STEPS.map(() => "complete")
+    isPending ? PIPELINE_STEPS.map(() => "pending") : PIPELINE_STEPS.map((step) => getStepResult(step.id))
   );
   const [activeSubStepIdx, setActiveSubStepIdx] = useState<Record<number, number>>({});
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
@@ -260,7 +277,7 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
           if (cancelled) return;
         }
 
-        setStepStatuses((p) => p.map((s, idx) => (idx === i ? "complete" : s)));
+        setStepStatuses((p) => p.map((s, idx) => (idx === i ? getStepResult(step.id) : s)));
         setActiveSubStepIdx((p) => ({ ...p, [i]: -1 }));
       }
     };
@@ -315,7 +332,10 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
                 <div className="flex-1 min-w-0">
                   <p className={cn(
                     "text-sm font-medium",
-                    stepStatus === "running" ? "text-primary" : stepStatus === "complete" ? "text-foreground" : "text-muted-foreground"
+                    stepStatus === "running" ? "text-primary"
+                      : stepStatus === "failed" ? "text-red-600"
+                      : stepStatus === "complete" ? "text-foreground"
+                      : "text-muted-foreground"
                   )}>
                     {step.label}
                   </p>
@@ -325,7 +345,7 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
                 {stepStatus === "running" && stepStartTimes[i] && (
                   <ElapsedTimer running={true} startTime={stepStartTimes[i]} />
                 )}
-                {stepStatus === "complete" && (
+                {(stepStatus === "complete" || stepStatus === "failed") && (
                   <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                     {(step.durationMs / 1000).toFixed(1)}s
                   </span>
