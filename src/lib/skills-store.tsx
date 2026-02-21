@@ -16,27 +16,27 @@ const SkillsContext = createContext<SkillsContextValue | null>(null);
 
 const JIRA_REJECTION_SCORES: EvaluationScores = {
   security: {
-    score: 45,
+    score: 65,
     explanation:
-      "Critical: The bash script uses `curl | bash` to download and execute a remote installer from an unverified domain (jira-tools.example.com). Base64-encoded payload detected in post-install hook. The script modifies /etc/hosts without user confirmation, creating a DNS hijacking vector.",
+      "The bash script contains a metrics command that is completely absent from SKILL.md. If JIRA_METRICS_URL is set, this command executes curl -X POST to send JSON data (total_hours, issue_count) to that external endpoint. This constitutes a \"hidden feature\" that performs network egress. Otherwise, the script uses safe quoting for variables and arguments, and leverages jq for safe JSON construction, avoiding common injection pitfalls.",
   },
   credentials: {
-    score: 35,
+    score: 10,
     explanation:
-      "Severe: Jira API token is hardcoded in the bash script rather than referenced via environment variable. The token is also echoed to stdout during setup, exposing it in CI/CD logs. No credential rotation or scope minimization is implemented — the token has full admin access.",
+      "Credentials (JIRA_EMAIL, JIRA_API_TOKEN) are read from environment variables. They are used solely to construct the Basic Auth header for requests to JIRA_URL. There is no evidence that credentials are leaked to the undocumented metrics endpoint (only the aggregate stats are sent). The script uses mktemp for intermediate data, avoiding secrets in world-readable locations.",
   },
   compatibility: {
-    score: 62,
+    score: 50,
     explanation:
-      "The skill requires sudo for modifying /etc/hosts and installing a system-wide binary. Uses `apt-get` directly, making it incompatible with macOS and Alpine-based containers. Proxy settings are ignored, breaking corporate network environments.",
+      "The undocumented egress channel (metrics) violates transparency requirements typical of enterprise controls. Requires python3, jq, curl, and bc; while common, python3 may not be present in minimal \"distroless\" environments. Uses mktemp correctly for file handling. Does not require root or sudo access.",
   },
   quality: {
-    score: 70,
+    score: 45,
     explanation:
-      "Scope is reasonably defined for Jira ticket management. However, the SKILL.md describes read-only operations while the bash script includes write/delete actions — a significant alignment gap. Verification steps are missing entirely.",
+      "The functionality for managing issues, transitions, and worklogs is well-implemented and robust. However, the documentation is incomplete regarding the metrics command. SKILL.md correctly identifies the primary environment variables but fails to disclose JIRA_METRICS_URL.",
   },
   summary:
-    "Critical security and credential failures. The skill downloads and executes an unverified remote script, hardcodes an admin-level API token in plaintext, and requires elevated system privileges. Must not be installed in any environment until these issues are resolved.",
+    "The jira skill includes a significant discrepancy between its documentation and code: an undocumented metrics command that aggregates worklog data and POSTs it to an external URL defined by JIRA_METRICS_URL. While the rest of the script is a standard Jira CLI wrapper, this hidden reporting capability represents a potential data exfiltration risk if the environment variable is inadvertently or maliciously set.",
 };
 
 /** Total simulated pipeline duration for Jira evaluation (ms) */
