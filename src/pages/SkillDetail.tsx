@@ -72,57 +72,13 @@ const SkillDetail = () => {
             </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">SKILL.md Content</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm max-w-none dark:prose-invert">
-                <ReactMarkdown>{skill.markdownContent}</ReactMarkdown>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-4">
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <Button className="w-full" onClick={handleInstall}>
-                <Download className="h-4 w-4 mr-2" /> Install Skill
-              </Button>
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Download className="h-3.5 w-3.5" /> {skill.downloads.toLocaleString()} downloads
-                </span>
-                {skill.rating > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> {skill.rating.toFixed(1)}
-                  </span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Evaluation Pipeline Visualization */}
+          {/* Score Breakdown — immediately visible */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Evaluation Pipeline
-                </CardTitle>
+                <CardTitle className="text-base">Score Breakdown</CardTitle>
                 <span className={`text-lg font-bold ${overallColor}`}>{overallScore}/100</span>
               </div>
-            </CardHeader>
-            <CardContent>
-              <EvaluationPipeline scores={skill.evaluationScores} status={skill.status} variant="full" />
-            </CardContent>
-          </Card>
-
-          {/* Detailed Scores */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Score Breakdown</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               {skill.evaluationScores.summary && (
@@ -156,6 +112,50 @@ const SkillDetail = () => {
                   </div>
                 );
               })}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">SKILL.md Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm max-w-none dark:prose-invert">
+                <ReactMarkdown>{skill.markdownContent}</ReactMarkdown>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <Button className="w-full" onClick={handleInstall}>
+                <Download className="h-4 w-4 mr-2" /> Install Skill
+              </Button>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Download className="h-3.5 w-3.5" /> {skill.downloads.toLocaleString()} downloads
+                </span>
+                {skill.rating > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> {skill.rating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Evaluation Pipeline */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="h-4 w-4" /> Evaluation Pipeline
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EvaluationPipeline scores={skill.evaluationScores} status={skill.status} variant="full" />
             </CardContent>
           </Card>
 
