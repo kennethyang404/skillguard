@@ -136,7 +136,7 @@ const SkillDetail = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">SKILL.md Content</CardTitle>
+              <CardTitle className="text-lg">Skill Content</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm max-w-none dark:prose-invert">
