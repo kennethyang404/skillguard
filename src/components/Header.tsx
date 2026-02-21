@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { useSkills } from "@/lib/skills-store";
-import { Shield, Package, Upload, LayoutDashboard, X } from "lucide-react";
+import { Shield, Package, Upload, LayoutDashboard, X, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const HINT_KEY = "skillguard_admin_hint_shown";
 
@@ -11,6 +14,7 @@ export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [showHint, setShowHint] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (location.pathname === "/submit" && !localStorage.getItem(HINT_KEY)) {
@@ -19,6 +23,11 @@ export function Header() {
     } else {
       setShowHint(false);
     }
+  }, [location.pathname]);
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileOpen(false);
   }, [location.pathname]);
 
   const dismissHint = () => {
@@ -36,6 +45,28 @@ export function Header() {
     navItems.push({ to: "/admin", label: "Review Dashboard", icon: LayoutDashboard });
   }
 
+  const roleToggle = (
+    <div className="flex items-center gap-3 text-sm">
+      <span className={`font-medium ${role === "employee" ? "text-foreground" : "text-muted-foreground"}`}>
+        Employee
+      </span>
+      <Switch
+        checked={role === "admin"}
+        onCheckedChange={(checked) => {
+          dismissHint();
+          const newRole = checked ? "admin" : "employee";
+          setRole(newRole);
+          if (newRole === "employee" && location.pathname === "/admin") {
+            navigate("/");
+          }
+        }}
+      />
+      <span className={`font-medium ${role === "admin" ? "text-foreground" : "text-muted-foreground"}`}>
+        Admin
+      </span>
+    </div>
+  );
+
   return (
     <>
       {showHint && (
@@ -47,7 +78,7 @@ export function Header() {
             <Link to="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
               <Shield className="h-5 w-5 text-primary" />
               <span>SkillGuard</span>
-              <span className="rounded-md bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 leading-none">Enterprise</span>
+              <span className="hidden sm:inline rounded-md bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 leading-none">Enterprise</span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
@@ -70,7 +101,9 @@ export function Header() {
               })}
             </nav>
           </div>
-          <div className="relative flex items-center gap-3 text-sm">
+
+          {/* Desktop role toggle */}
+          <div className="relative hidden md:flex items-center gap-3 text-sm">
             {showHint && (
               <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border bg-popover p-3 shadow-lg animate-in fade-in-0 slide-in-from-top-2 z-50">
                 <div className="absolute -top-1.5 right-6 h-3 w-3 rotate-45 border-l border-t bg-popover" />
@@ -84,23 +117,46 @@ export function Header() {
                 </div>
               </div>
             )}
-            <span className={`font-medium ${role === "employee" ? "text-foreground" : "text-muted-foreground"}`}>
-              Employee
-            </span>
-            <Switch
-              checked={role === "admin"}
-              onCheckedChange={(checked) => {
-                dismissHint();
-                const newRole = checked ? "admin" : "employee";
-                setRole(newRole);
-                if (newRole === "employee" && location.pathname === "/admin") {
-                  navigate("/");
-                }
-              }}
-            />
-            <span className={`font-medium ${role === "admin" ? "text-foreground" : "text-muted-foreground"}`}>
-              Admin
-            </span>
+            {roleToggle}
+          </div>
+
+          {/* Mobile hamburger */}
+          <div className="md:hidden">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 pt-10">
+                <nav className="flex flex-col gap-1">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = location.pathname === item.to;
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                          active
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+                <Separator className="my-4" />
+                <div className="px-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wider">Role</p>
+                  {roleToggle}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
