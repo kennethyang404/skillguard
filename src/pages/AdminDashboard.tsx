@@ -12,8 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Skill, SkillStatus } from "@/lib/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Shield, Puzzle, Sparkles, Check, X, KeyRound } from "lucide-react";
+import { Shield, Puzzle, Sparkles, Check, X, KeyRound, ChevronDown } from "lucide-react";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const statusColors: Record<string, string> = {
   approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -146,64 +147,89 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Evaluation Pipeline */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Evaluation Pipeline</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <EvaluationPipeline scores={selectedSkill.evaluationScores} status={selectedSkill.status} variant="full" />
-                  </CardContent>
-                </Card>
+                <Collapsible defaultOpen>
+                  <Card>
+                    <CollapsibleTrigger className="w-full">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-sm">Evaluation Pipeline</CardTitle>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>div>&]:rotate-180" />
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent>
+                        <EvaluationPipeline scores={selectedSkill.evaluationScores} status={selectedSkill.status} variant="full" />
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
 
                 {/* Score Breakdown */}
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm">Score Breakdown</CardTitle>
-                      {(() => {
-                        const scores = EVALUATION_KEYS.map((k) => getScore(selectedSkill.evaluationScores[k]));
-                        const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-                        const c = avg >= 90 ? "text-emerald-600" : avg >= 70 ? "text-amber-600" : avg > 0 ? "text-red-600" : "text-muted-foreground";
-                        return <span className={`text-sm font-bold ${c}`}>{avg > 0 ? `${avg}/100` : "Pending"}</span>;
-                      })()}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {selectedSkill.evaluationScores.summary && (
-                      <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-                        {selectedSkill.evaluationScores.summary}
-                      </p>
-                    )}
-                    {EVALUATION_KEYS.map((key) => {
-                      const Icon = EVAL_ICONS[key];
-                      const val = selectedSkill.evaluationScores[key];
-                      const score = getScore(val);
-                      const explanation = getExplanation(val);
-                      const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : score > 0 ? "text-red-600" : "text-muted-foreground";
-                      return (
-                        <div key={key} className="space-y-1.5">
-                          <div className="flex justify-between text-sm">
-                            <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{EVALUATION_LABELS[key]}</span>
-                            <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
+                <Collapsible defaultOpen>
+                  <Card>
+                    <CollapsibleTrigger className="w-full">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm">Score Breakdown</CardTitle>
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const scores = EVALUATION_KEYS.map((k) => getScore(selectedSkill.evaluationScores[k]));
+                              const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                              const c = avg >= 90 ? "text-emerald-600" : avg >= 70 ? "text-amber-600" : avg > 0 ? "text-red-600" : "text-muted-foreground";
+                              return <span className={`text-sm font-bold ${c}`}>{avg > 0 ? `${avg}/100` : "Pending"}</span>;
+                            })()}
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           </div>
-                          <Progress value={score} className="h-2" indicatorClassName={score >= 90 ? "bg-emerald-500" : score >= 70 ? "bg-amber-500" : "bg-red-500"} />
-                          {explanation && (
-                            <p className="text-xs text-muted-foreground leading-relaxed pl-5">{explanation}</p>
-                          )}
                         </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent className="space-y-4">
+                        {selectedSkill.evaluationScores.summary && (
+                          <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                            {selectedSkill.evaluationScores.summary}
+                          </p>
+                        )}
+                        {EVALUATION_KEYS.map((key) => {
+                          const Icon = EVAL_ICONS[key];
+                          const val = selectedSkill.evaluationScores[key];
+                          const score = getScore(val);
+                          const explanation = getExplanation(val);
+                          const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : score > 0 ? "text-red-600" : "text-muted-foreground";
+                          return (
+                            <div key={key} className="space-y-1.5">
+                              <div className="flex justify-between text-sm">
+                                <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{EVALUATION_LABELS[key]}</span>
+                                <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
+                              </div>
+                              <Progress value={score} className="h-2" indicatorClassName={score >= 90 ? "bg-emerald-500" : score >= 70 ? "bg-amber-500" : "bg-red-500"} />
+                              {explanation && (
+                                <p className="text-xs text-muted-foreground leading-relaxed pl-5">{explanation}</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
 
-                <Card>
-                  <CardHeader><CardTitle className="text-sm">SKILL.md Preview</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <ReactMarkdown>{selectedSkill.markdownContent}</ReactMarkdown>
-                    </div>
-                  </CardContent>
-                </Card>
+                <Collapsible defaultOpen>
+                  <Card>
+                    <CollapsibleTrigger className="w-full">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-sm">SKILL.md Preview</CardTitle>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent>
+                        <div className="prose prose-sm max-w-none dark:prose-invert">
+                          <ReactMarkdown>{selectedSkill.markdownContent}</ReactMarkdown>
+                        </div>
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
 
                 {selectedSkill.bashScript && (
                   <Card>
