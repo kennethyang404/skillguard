@@ -1,7 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getScore } from "@/lib/types";
 import type { EvaluationScores } from "@/lib/types";
-import { Shield, Puzzle, Sparkles, FileSearch, Binary, Network, CheckCircle2, Loader2, AlertTriangle, Cpu, Scan, Lock, GitBranch, Fingerprint, Zap } from "lucide-react";
+import {
+  Shield, Puzzle, Sparkles, FileSearch, Binary, Network,
+  CheckCircle2, Loader2, Cpu, Scan, Lock, GitBranch,
+  Fingerprint, Zap, Clock, ChevronRight, Circle, XCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PipelineStep {
@@ -20,10 +24,10 @@ const PIPELINE_STEPS: PipelineStep[] = [
     sublabel: "SKILL.md structure",
     icon: FileSearch,
     subSteps: [
-      "Parsing markdown AST...",
-      "Validating section headers...",
-      "Extracting procedure steps...",
-      "Checking schema compliance...",
+      "Parsing markdown AST",
+      "Validating section headers",
+      "Extracting procedure steps",
+      "Checking schema compliance",
     ],
     durationMs: 1800,
   },
@@ -33,11 +37,11 @@ const PIPELINE_STEPS: PipelineStep[] = [
     sublabel: "Threat & risk scan",
     icon: Shield,
     subSteps: [
-      "Scanning for injection vectors...",
-      "Analyzing permission boundaries...",
-      "Checking data exposure risks...",
-      "Evaluating credential handling...",
-      "Assessing sandboxing requirements...",
+      "Scanning for injection vectors",
+      "Analyzing permission boundaries",
+      "Checking data exposure risks",
+      "Evaluating credential handling",
+      "Assessing sandboxing requirements",
     ],
     durationMs: 2800,
   },
@@ -47,10 +51,10 @@ const PIPELINE_STEPS: PipelineStep[] = [
     sublabel: "Enterprise readiness",
     icon: Puzzle,
     subSteps: [
-      "Testing platform integrations...",
-      "Validating API contract schemas...",
-      "Checking version constraints...",
-      "Assessing cross-environment portability...",
+      "Testing platform integrations",
+      "Validating API contract schemas",
+      "Checking version constraints",
+      "Assessing cross-env portability",
     ],
     durationMs: 2200,
   },
@@ -60,10 +64,10 @@ const PIPELINE_STEPS: PipelineStep[] = [
     sublabel: "Capability scoring",
     icon: Sparkles,
     subSteps: [
-      "Measuring procedure completeness...",
-      "Evaluating verification criteria...",
-      "Analyzing edge case coverage...",
-      "Computing quality confidence score...",
+      "Measuring procedure completeness",
+      "Evaluating verification criteria",
+      "Analyzing edge case coverage",
+      "Computing quality confidence",
     ],
     durationMs: 2400,
   },
@@ -73,39 +77,35 @@ const PIPELINE_STEPS: PipelineStep[] = [
     sublabel: "Final synthesis",
     icon: Binary,
     subSteps: [
-      "Aggregating category scores...",
-      "Generating explanations...",
-      "Computing overall assessment...",
-      "Finalizing evaluation report...",
+      "Aggregating category scores",
+      "Generating explanations",
+      "Computing overall assessment",
+      "Finalizing evaluation report",
     ],
     durationMs: 1600,
   },
 ];
 
-type StepStatus = "pending" | "running" | "complete";
+type StepStatus = "pending" | "running" | "complete" | "failed";
 
 interface EvaluationPipelineProps {
   scores: EvaluationScores;
   status: "approved" | "pending" | "rejected";
-  /** "full" = animated pipeline on detail page; "compact" = mini indicator on cards */
   variant?: "full" | "compact";
 }
 
-/** Compact mini-visualization for skill cards */
+/* ─── Compact (cards) ─── */
 function CompactPipeline({ scores, status }: { scores: EvaluationScores; status: string }) {
   const overallScore = Math.round(
-    [scores.security, scores.compatibility, scores.quality]
-      .map(getScore)
-      .reduce((a, b) => a + b, 0) / 3
+    [scores.security, scores.compatibility, scores.quality].map(getScore).reduce((a, b) => a + b, 0) / 3
   );
   const isPending = status === "pending";
-
-  // Animated dots for pending
   const [activeDot, setActiveDot] = useState(0);
+
   useEffect(() => {
     if (!isPending) return;
-    const interval = setInterval(() => setActiveDot((d) => (d + 1) % 5), 600);
-    return () => clearInterval(interval);
+    const id = setInterval(() => setActiveDot((d) => (d + 1) % 5), 600);
+    return () => clearInterval(id);
   }, [isPending]);
 
   const icons = [FileSearch, Shield, Puzzle, Sparkles, Binary];
@@ -118,40 +118,24 @@ function CompactPipeline({ scores, status }: { scores: EvaluationScores; status:
             <div
               className={cn(
                 "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300",
-                i < activeDot
-                  ? "bg-primary/20 text-primary"
-                  : i === activeDot
-                  ? "bg-primary text-primary-foreground animate-pulse"
+                i < activeDot ? "bg-primary/20 text-primary"
+                  : i === activeDot ? "bg-primary text-primary-foreground animate-pulse"
                   : "bg-muted text-muted-foreground"
               )}
             >
               <Icon className="h-2.5 w-2.5" />
             </div>
             {i < icons.length - 1 && (
-              <div
-                className={cn(
-                  "w-2 h-px transition-colors duration-300",
-                  i < activeDot ? "bg-primary/40" : "bg-border"
-                )}
-              />
+              <div className={cn("w-2 h-px transition-colors duration-300", i < activeDot ? "bg-primary/40" : "bg-border")} />
             )}
           </div>
         ))}
-        <span className="text-[10px] text-muted-foreground ml-1.5 animate-pulse">
-          Evaluating...
-        </span>
+        <span className="text-[10px] text-muted-foreground ml-1.5 animate-pulse">Evaluating…</span>
       </div>
     );
   }
 
-  // Completed: show tiny score bar
-  const color =
-    overallScore >= 90
-      ? "bg-emerald-500"
-      : overallScore >= 70
-      ? "bg-amber-500"
-      : "bg-red-500";
-
+  const color = overallScore >= 90 ? "bg-emerald-500" : overallScore >= 70 ? "bg-amber-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-2 mt-2">
       <div className="flex items-center gap-0.5">
@@ -172,144 +156,243 @@ function CompactPipeline({ scores, status }: { scores: EvaluationScores; status:
   );
 }
 
-/** Full animated pipeline visualization */
+/* ─── Elapsed timer ─── */
+function ElapsedTimer({ running, startTime }: { running: boolean; startTime: number }) {
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setElapsed(Date.now() - startTime), 100);
+    return () => clearInterval(id);
+  }, [running, startTime]);
+
+  const seconds = running ? (elapsed / 1000).toFixed(1) : ((elapsed || 0) / 1000).toFixed(1);
+  return (
+    <span className="text-[10px] font-mono text-muted-foreground tabular-nums flex items-center gap-1">
+      <Clock className="h-2.5 w-2.5" />
+      {seconds}s
+    </span>
+  );
+}
+
+/* ─── GitHub-CI-style status icon ─── */
+function StatusIcon({ status, icon: Icon }: { status: StepStatus; icon: React.ElementType }) {
+  switch (status) {
+    case "complete":
+      return (
+        <div className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+          <CheckCircle2 className="h-4 w-4" />
+        </div>
+      );
+    case "running":
+      return (
+        <div className="relative w-7 h-7 flex items-center justify-center">
+          {/* spinning ring */}
+          <svg className="absolute inset-0 w-7 h-7 animate-spin" viewBox="0 0 28 28">
+            <circle cx="14" cy="14" r="12" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="50 26" strokeLinecap="round" />
+          </svg>
+          <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center z-10">
+            <Icon className="h-3 w-3" />
+          </div>
+        </div>
+      );
+    case "failed":
+      return (
+        <div className="w-7 h-7 rounded-full bg-red-500/15 text-red-600 flex items-center justify-center">
+          <XCircle className="h-4 w-4" />
+        </div>
+      );
+    default:
+      return (
+        <div className="w-7 h-7 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+          <Circle className="h-3 w-3" />
+        </div>
+      );
+  }
+}
+
+/* ─── Full pipeline (GitHub CI style) ─── */
 function FullPipeline({ scores, status }: { scores: EvaluationScores; status: string }) {
   const isPending = status === "pending";
+  const isRejected = status === "rejected";
+
   const [stepStatuses, setStepStatuses] = useState<StepStatus[]>(
     isPending ? PIPELINE_STEPS.map(() => "pending") : PIPELINE_STEPS.map(() => "complete")
   );
-  const [activeSubStep, setActiveSubStep] = useState("");
+  const [activeSubStepIdx, setActiveSubStepIdx] = useState<Record<number, number>>({});
+  const [expandedStep, setExpandedStep] = useState<number | null>(null);
+  const [stepStartTimes, setStepStartTimes] = useState<Record<number, number>>({});
   const [logLines, setLogLines] = useState<string[]>([]);
+  const logRef = useRef<HTMLDivElement>(null);
 
-  // Animate the pipeline for pending skills
+  // Auto-scroll log
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [logLines]);
+
   useEffect(() => {
     if (!isPending) {
-      // For completed skills, show all as complete with full logs
-      const completedLogs = PIPELINE_STEPS.flatMap((step) => [
+      const completed = PIPELINE_STEPS.flatMap((step) => [
         `▸ ${step.label}`,
-        ...step.subSteps.map((s) => `  ✓ ${s.replace("...", " — done")}`),
+        ...step.subSteps.map((s) => `  ✓ ${s} — done`),
       ]);
-      setLogLines(completedLogs);
+      setLogLines(completed);
       return;
     }
 
     let cancelled = false;
-    const runPipeline = async () => {
+    const run = async () => {
       for (let i = 0; i < PIPELINE_STEPS.length; i++) {
         if (cancelled) return;
         const step = PIPELINE_STEPS[i];
+        setStepStatuses((p) => p.map((s, idx) => (idx === i ? "running" : s)));
+        setStepStartTimes((p) => ({ ...p, [i]: Date.now() }));
+        setExpandedStep(i);
+        setLogLines((p) => [...p, `▸ ${step.label}`]);
 
-        // Start this step
-        setStepStatuses((prev) => prev.map((s, idx) => (idx === i ? "running" : s)));
-        setLogLines((prev) => [...prev, `▸ ${step.label}`]);
-
-        // Animate sub-steps
         for (let j = 0; j < step.subSteps.length; j++) {
           if (cancelled) return;
-          setActiveSubStep(step.subSteps[j]);
-          setLogLines((prev) => [...prev, `  ◦ ${step.subSteps[j]}`]);
+          setActiveSubStepIdx((p) => ({ ...p, [i]: j }));
+          setLogLines((p) => [...p, `  ◦ ${step.subSteps[j]}…`]);
           await new Promise((r) => setTimeout(r, step.durationMs / step.subSteps.length));
           if (cancelled) return;
-          setLogLines((prev) => {
-            const updated = [...prev];
-            updated[updated.length - 1] = `  ✓ ${step.subSteps[j].replace("...", " — done")}`;
-            return updated;
+          setLogLines((p) => {
+            const u = [...p];
+            u[u.length - 1] = `  ✓ ${step.subSteps[j]} — done`;
+            return u;
           });
         }
 
-        // Complete this step
-        setStepStatuses((prev) => prev.map((s, idx) => (idx === i ? "complete" : s)));
-        setActiveSubStep("");
+        setStepStatuses((p) => p.map((s, idx) => (idx === i ? "complete" : s)));
+        setActiveSubStepIdx((p) => ({ ...p, [i]: -1 }));
       }
     };
-
-    runPipeline();
-    return () => {
-      cancelled = true;
-    };
+    run();
+    return () => { cancelled = true; };
   }, [isPending]);
 
-  const overallScore = Math.round(
-    [scores.security, scores.compatibility, scores.quality]
-      .map(getScore)
-      .reduce((a, b) => a + b, 0) / 3
-  );
-
-  const decorativeIcons = [Cpu, Scan, Lock, GitBranch, Fingerprint, Zap, Network];
+  const totalDuration = PIPELINE_STEPS.reduce((s, p) => s + p.durationMs, 0);
 
   return (
-    <div className="space-y-4">
-      {/* Pipeline Steps */}
-      <div className="relative">
-        {/* Vertical connector line */}
-        <div className="absolute left-[15px] top-4 bottom-4 w-px bg-border" />
-
-        <div className="space-y-1">
-          {PIPELINE_STEPS.map((step, i) => {
-            const Icon = step.icon;
-            const stepStatus = stepStatuses[i];
-            return (
-              <div key={step.id} className="relative flex items-start gap-3 py-2">
-                {/* Node */}
-                <div
-                  className={cn(
-                    "relative z-10 w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-500",
-                    stepStatus === "complete"
-                      ? "bg-primary text-primary-foreground"
-                      : stepStatus === "running"
-                      ? "bg-primary/20 text-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-background"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {stepStatus === "complete" ? (
-                    <CheckCircle2 className="h-4 w-4" />
-                  ) : stepStatus === "running" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Icon className="h-4 w-4" />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p
-                        className={cn(
-                          "text-sm font-medium transition-colors",
-                          stepStatus === "running" ? "text-primary" : stepStatus === "complete" ? "text-foreground" : "text-muted-foreground"
-                        )}
-                      >
-                        {step.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{step.sublabel}</p>
-                    </div>
-                    {stepStatus === "complete" && (
-                      <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {(step.durationMs / 1000).toFixed(1)}s
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Running indicator with sub-step */}
-                  {stepStatus === "running" && activeSubStep && (
-                    <div className="mt-1.5 flex items-center gap-2 animate-fade-in">
-                      <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-primary/60 rounded-full animate-pulse" style={{ width: "60%" }} />
-                      </div>
-                      <span className="text-[10px] text-primary font-mono truncate max-w-[180px]">
-                        {activeSubStep}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+    <div className="space-y-3">
+      {/* Header bar — GitHub CI style */}
+      <div className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border",
+        isPending
+          ? "bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400"
+          : isRejected
+          ? "bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400"
+          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+      )}>
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : isRejected ? (
+          <XCircle className="h-4 w-4" />
+        ) : (
+          <CheckCircle2 className="h-4 w-4" />
+        )}
+        <span>
+          {isPending ? "Evaluation in progress…" : isRejected ? "Evaluation complete — issues found" : "Evaluation passed"}
+        </span>
+        <span className="ml-auto text-xs font-mono opacity-70">
+          {isPending ? "running" : `${(totalDuration / 1000).toFixed(1)}s total`}
+        </span>
       </div>
 
-      {/* Terminal-style log output */}
+      {/* Steps list */}
+      <div className="border border-border rounded-lg overflow-hidden divide-y divide-border">
+        {PIPELINE_STEPS.map((step, i) => {
+          const Icon = step.icon;
+          const stepStatus = stepStatuses[i];
+          const isExpanded = expandedStep === i;
+          const subIdx = activeSubStepIdx[i] ?? -1;
+
+          return (
+            <div key={step.id}>
+              {/* Step row */}
+              <button
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/50",
+                  stepStatus === "running" && "bg-primary/[0.03]"
+                )}
+                onClick={() => setExpandedStep(isExpanded ? null : i)}
+              >
+                <StatusIcon status={stepStatus} icon={Icon} />
+                <div className="flex-1 min-w-0">
+                  <p className={cn(
+                    "text-sm font-medium",
+                    stepStatus === "running" ? "text-primary" : stepStatus === "complete" ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {step.label}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">{step.sublabel}</p>
+                </div>
+
+                {stepStatus === "running" && stepStartTimes[i] && (
+                  <ElapsedTimer running={true} startTime={stepStartTimes[i]} />
+                )}
+                {stepStatus === "complete" && (
+                  <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                    {(step.durationMs / 1000).toFixed(1)}s
+                  </span>
+                )}
+
+                <ChevronRight className={cn(
+                  "h-4 w-4 text-muted-foreground transition-transform shrink-0",
+                  isExpanded && "rotate-90"
+                )} />
+              </button>
+
+              {/* Expanded sub-steps */}
+              <div className={cn(
+                "overflow-hidden transition-all duration-300",
+                isExpanded ? "max-h-[500px]" : "max-h-0"
+              )}>
+                <div className="px-3 pb-3 pt-1 ml-10 space-y-1.5 border-l-2 border-border ml-[26px]">
+                  {step.subSteps.map((sub, j) => {
+                    const subDone = stepStatus === "complete" || (stepStatus === "running" && j < subIdx);
+                    const subRunning = stepStatus === "running" && j === subIdx;
+                    return (
+                      <div
+                        key={j}
+                        className={cn(
+                          "flex items-center gap-2 text-xs pl-3 py-1 rounded transition-all",
+                          subRunning && "bg-primary/5"
+                        )}
+                      >
+                        {subDone ? (
+                          <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
+                        ) : subRunning ? (
+                          <Loader2 className="h-3 w-3 text-primary animate-spin shrink-0" />
+                        ) : (
+                          <Circle className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                        )}
+                        <span className={cn(
+                          subDone ? "text-muted-foreground" : subRunning ? "text-primary font-medium" : "text-muted-foreground/50"
+                        )}>
+                          {sub}
+                        </span>
+                        {subRunning && (
+                          <span className="ml-auto">
+                            <span className="inline-flex gap-0.5">
+                              <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                              <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                              <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Terminal log */}
       <div className="bg-foreground/[0.03] border border-border rounded-lg overflow-hidden">
         <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-border bg-muted/50">
           <div className="w-2 h-2 rounded-full bg-red-400" />
@@ -320,16 +403,13 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
             <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground ml-auto" />
           )}
         </div>
-        <div className="p-3 max-h-36 overflow-y-auto font-mono text-[11px] leading-relaxed text-muted-foreground space-y-0.5 scrollbar-thin">
+        <div ref={logRef} className="p-3 max-h-32 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5">
           {logLines.map((line, i) => (
             <div
               key={i}
               className={cn(
-                "transition-opacity duration-200",
-                line.startsWith("▸")
-                  ? "text-foreground font-semibold mt-1"
-                  : line.includes("✓")
-                  ? "text-emerald-600 dark:text-emerald-400"
+                line.startsWith("▸") ? "text-foreground font-semibold mt-1"
+                  : line.includes("✓") ? "text-emerald-600 dark:text-emerald-400"
                   : "text-muted-foreground"
               )}
             >
@@ -341,38 +421,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
           )}
         </div>
       </div>
-
-      {/* Floating decorative network nodes — only when complete */}
-      {!isPending && (
-        <div className="relative h-10 overflow-hidden opacity-40">
-          <div className="absolute inset-0 flex items-center justify-around">
-            {decorativeIcons.map((DIcon, i) => (
-              <div
-                key={i}
-                className="w-6 h-6 rounded-full bg-muted/80 flex items-center justify-center"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              >
-                <DIcon className="h-3 w-3 text-muted-foreground" />
-              </div>
-            ))}
-          </div>
-          {/* Connection lines */}
-          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <line
-                key={i}
-                x1={`${(i + 0.5) * (100 / 7)}%`}
-                y1="50%"
-                x2={`${(i + 1.5) * (100 / 7)}%`}
-                y2="50%"
-                stroke="hsl(var(--border))"
-                strokeWidth="1"
-                strokeDasharray="3 3"
-              />
-            ))}
-          </svg>
-        </div>
-      )}
     </div>
   );
 }

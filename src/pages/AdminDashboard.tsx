@@ -13,6 +13,7 @@ import { Skill, SkillStatus } from "@/lib/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { Shield, Puzzle, Sparkles, Check, X } from "lucide-react";
+import { EvaluationPipeline } from "@/components/EvaluationPipeline";
 
 const statusColors: Record<string, string> = {
   approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -137,10 +138,21 @@ const AdminDashboard = () => {
                   <div><span className="text-muted-foreground">Category:</span> {selectedSkill.category}</div>
                 </div>
 
+                {/* Evaluation Pipeline */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Evaluation Pipeline</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EvaluationPipeline scores={selectedSkill.evaluationScores} status={selectedSkill.status} variant="full" />
+                  </CardContent>
+                </Card>
+
+                {/* Score Breakdown */}
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm">Evaluation Report</CardTitle>
+                      <CardTitle className="text-sm">Score Breakdown</CardTitle>
                       {(() => {
                         const scores = [selectedSkill.evaluationScores.security, selectedSkill.evaluationScores.compatibility, selectedSkill.evaluationScores.quality].map(getScore);
                         const avg = Math.round(scores.reduce((a, b) => a + b, 0) / 3);
