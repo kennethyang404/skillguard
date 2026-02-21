@@ -46,7 +46,12 @@ Automatically review pull requests for code quality, security vulnerabilities, a
 - Security checks should cover OWASP Top 10
 - False positive rate should be below 5%`,
     status: "approved",
-    evaluationScores: { security: 92, compatibility: 88, quality: 95 },
+    evaluationScores: {
+      security: { score: 92, explanation: "Properly scopes access to PR diffs only. No credential exposure risk. Minor concern: lacks rate-limiting guidance for API-based reviews." },
+      compatibility: { score: 88, explanation: "Works with major Git platforms (GitHub, GitLab, Bitbucket). Some edge cases with monorepo setups may require additional configuration." },
+      quality: { score: 95, explanation: "Comprehensive procedure with clear verification criteria. Covers OWASP Top 10 and maintains a low false-positive target. Well-structured output format." },
+      summary: "A high-quality, production-ready skill with excellent security awareness and thorough verification steps. Minor improvements possible in enterprise monorepo compatibility.",
+    },
     downloads: 1247,
     rating: 4.7,
     submissionMethod: "template",
@@ -87,7 +92,12 @@ Generate comprehensive, developer-friendly API documentation from source code an
 - Response schemas must match actual API responses
 - Links and cross-references must resolve correctly`,
     status: "approved",
-    evaluationScores: { security: 85, compatibility: 94, quality: 91 },
+    evaluationScores: {
+      security: { score: 85, explanation: "Handles source code parsing safely. No execution of user code. Potential risk if OpenAPI specs contain malicious payloads—recommend input sanitization." },
+      compatibility: { score: 94, explanation: "Supports OpenAPI 3.x, Swagger 2.0, and common annotation formats. Excellent cross-framework support including Express, FastAPI, and Spring Boot." },
+      quality: { score: 91, explanation: "Strong output quality with interactive examples. Schema validation ensures accuracy. Could improve by adding versioned documentation support." },
+      summary: "Reliable documentation generator with broad framework support. Security posture is solid with minor input validation recommendations.",
+    },
     downloads: 892,
     rating: 4.5,
     submissionMethod: "upload",
@@ -128,7 +138,12 @@ Automatically generate comprehensive unit and integration tests from function si
 - Coverage improvement must be measurable
 - No duplicate tests should be generated`,
     status: "approved",
-    evaluationScores: { security: 78, compatibility: 92, quality: 87 },
+    evaluationScores: {
+      security: { score: 78, explanation: "Test generation is sandboxed but mock object creation could inadvertently expose internal APIs. Recommend restricting mock scope to declared interfaces." },
+      compatibility: { score: 92, explanation: "Supports Jest, Vitest, Mocha, and pytest. TypeScript and Python type annotations are well-utilized for test inference." },
+      quality: { score: 87, explanation: "Good coverage of happy-path and edge cases. Could improve by detecting integration boundaries and generating contract tests." },
+      summary: "Solid test generation skill with good multi-framework support. Security could be tightened around mock object scoping.",
+    },
     downloads: 634,
     rating: 4.3,
     submissionMethod: "template",
@@ -169,7 +184,12 @@ Detect and report discrepancies between Infrastructure as Code definitions and t
 - Drift detection must not modify any resources
 - Reports must include timestamps and resource identifiers`,
     status: "pending",
-    evaluationScores: { security: 88, compatibility: 75, quality: 82 },
+    evaluationScores: {
+      security: { score: 88, explanation: "Read-only cloud API access with no resource modification risk. Credentials handling follows best practices. Should add audit logging for drift scans." },
+      compatibility: { score: 75, explanation: "Currently supports AWS and Terraform only. Azure and GCP support is planned but not yet implemented, limiting enterprise adoption." },
+      quality: { score: 82, explanation: "Good drift classification by severity. Remediation suggestions are helpful but lack automated fix options. Report format is clear." },
+      summary: "Promising DevOps skill with strong security posture. Limited cloud provider support is the main gap for enterprise readiness.",
+    },
     downloads: 0,
     rating: 0,
     submissionMethod: "upload",
@@ -210,7 +230,12 @@ Scan repositories for accidentally committed secrets, API tokens, passwords, and
 - False positive rate below 10%
 - Should not flag properly encrypted values`,
     status: "approved",
-    evaluationScores: { security: 97, compatibility: 90, quality: 93 },
+    evaluationScores: {
+      security: { score: 97, explanation: "Excellent coverage of secret patterns including OWASP-listed formats. Properly handles encrypted values to avoid false positives. Pre-commit hook integration prevents accidental commits." },
+      compatibility: { score: 90, explanation: "Works across all major languages and CI/CD platforms. Custom regex pattern support enables organization-specific rules. Minor gaps in binary file scanning." },
+      quality: { score: 93, explanation: "Thorough procedure with clear severity classification. Remediation suggestions are actionable. Low false-positive target (under 10%) is well-defined and achievable." },
+      summary: "Outstanding security skill with near-perfect detection capabilities. The gold standard for secret scanning in enterprise environments. Minor improvement possible in binary file analysis.",
+    },
     downloads: 2103,
     rating: 4.9,
     submissionMethod: "template",
@@ -251,7 +276,12 @@ Transform meeting transcripts into structured summaries with action items, decis
 - Decisions must be clearly stated, not implied
 - Summary should be under 20% of original transcript length`,
     status: "pending",
-    evaluationScores: { security: 70, compatibility: 85, quality: 80 },
+    evaluationScores: {
+      security: { score: 70, explanation: "Processes potentially sensitive meeting content. Lacks data retention policies and access controls. PII in transcripts is not redacted by default." },
+      compatibility: { score: 85, explanation: "Supports text transcripts from major platforms (Zoom, Teams, Meet). Audio file support is limited to common formats. No real-time processing." },
+      quality: { score: 80, explanation: "Action item extraction is reliable but decision identification could be more nuanced. Summary length constraint is well-defined." },
+      summary: "Useful communication skill with room for improvement in security (PII handling) and quality (decision detection accuracy).",
+    },
     downloads: 0,
     rating: 0,
     submissionMethod: "template",
@@ -292,7 +322,12 @@ Validate data pipeline configurations and perform pre-deployment data quality ch
 - Data quality thresholds must be configurable
 - Report must include sample failing records`,
     status: "approved",
-    evaluationScores: { security: 82, compatibility: 91, quality: 89 },
+    evaluationScores: {
+      security: { score: 82, explanation: "Data validation is properly sandboxed. No write operations on production data. Should add support for encrypted data source connections." },
+      compatibility: { score: 91, explanation: "Supports common pipeline frameworks (Airflow, dbt, Spark). Schema format support is broad including JSON Schema, Avro, and Protobuf." },
+      quality: { score: 89, explanation: "Comprehensive validation checks with configurable thresholds. Sample failing records in reports are very useful for debugging. Could add trend analysis." },
+      summary: "Well-rounded data quality skill with strong compatibility across pipeline frameworks. Security and quality are both solid with minor enhancement opportunities.",
+    },
     downloads: 456,
     rating: 4.4,
     submissionMethod: "upload",
@@ -333,7 +368,12 @@ Automatically generate well-formatted changelogs from git commit history and pul
 - Categories must follow conventional commit types
 - Breaking changes must be prominently highlighted`,
     status: "rejected",
-    evaluationScores: { security: 65, compatibility: 60, quality: 55 },
+    evaluationScores: {
+      security: { score: 65, explanation: "Git history access is read-only but lacks authentication for private repositories. No safeguards against including sensitive commit messages in changelogs." },
+      compatibility: { score: 60, explanation: "Only supports conventional commit format. Repositories using other commit conventions will produce incomplete or inaccurate changelogs." },
+      quality: { score: 55, explanation: "Procedure lacks error handling for non-conventional commits. No fallback strategy for malformed commit messages. Breaking change detection is unreliable." },
+      summary: "Below quality threshold. The skill assumes a specific commit convention without fallbacks, and security around private repository access and sensitive content filtering needs significant work.",
+    },
     downloads: 0,
     rating: 0,
     submissionMethod: "upload",
