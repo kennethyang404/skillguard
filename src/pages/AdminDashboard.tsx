@@ -146,23 +146,6 @@ const AdminDashboard = () => {
                   <div><span className="text-muted-foreground">Category:</span> {selectedSkill.category}</div>
                 </div>
 
-                {/* Evaluation Pipeline */}
-                <Collapsible defaultOpen>
-                  <Card>
-                    <CollapsibleTrigger className="w-full">
-                      <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-sm">Evaluation Pipeline</CardTitle>
-                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>div>&]:rotate-180" />
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <CardContent>
-                        <EvaluationPipeline scores={selectedSkill.evaluationScores} status={selectedSkill.status} variant="full" />
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
-
                 {/* Score Breakdown */}
                 <Collapsible defaultOpen>
                   <Card>
@@ -208,6 +191,23 @@ const AdminDashboard = () => {
                             </div>
                           );
                         })}
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
+
+                {/* Evaluation Pipeline */}
+                <Collapsible defaultOpen>
+                  <Card>
+                    <CollapsibleTrigger className="w-full">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-sm">Evaluation Pipeline</CardTitle>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>div>&]:rotate-180" />
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent>
+                        <EvaluationPipeline scores={selectedSkill.evaluationScores} status={selectedSkill.status} variant="full" />
                       </CardContent>
                     </CollapsibleContent>
                   </Card>
