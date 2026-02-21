@@ -12,7 +12,7 @@ import { CATEGORIES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import JSZip from "jszip";
-import { Upload, FileText, Loader2, ChevronDown, Shield, Cpu, Puzzle, Sparkles, CheckCircle2, Scan, KeyRound, Network, Terminal } from "lucide-react";
+import { Upload, FileText, Loader2, ChevronDown, Shield, Cpu, Puzzle, Sparkles, CheckCircle2, Scan, KeyRound, Terminal } from "lucide-react";
 
 const SubmissionPortal = () => {
   const { addSkill } = useSkills();
@@ -413,16 +413,6 @@ const SubmissionPortal = () => {
                       "Constraint clarity evaluation",
                       "SKILL.md ↔ bash code alignment",
                       "Auditability & safe defaults check",
-                    ],
-                  },
-                  {
-                    icon: Network,
-                    title: "Network Egress & Data Disclosure",
-                    steps: [
-                      "Outbound network action enumeration",
-                      "Download vs upload classification",
-                      "Documentation alignment verification",
-                      "Undisclosed data transmission flagging",
                     ],
                   },
                 ].map((category) => {
