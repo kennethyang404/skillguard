@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { getScore } from "@/lib/types";
+import { getScore, getExplanation } from "@/lib/types";
 import { useSkills } from "@/lib/skills-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -138,8 +138,23 @@ const AdminDashboard = () => {
                 </div>
 
                 <Card>
-                  <CardHeader><CardTitle className="text-sm">Evaluation Report</CardTitle></CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm">Evaluation Report</CardTitle>
+                      {(() => {
+                        const scores = [selectedSkill.evaluationScores.security, selectedSkill.evaluationScores.compatibility, selectedSkill.evaluationScores.quality].map(getScore);
+                        const avg = Math.round(scores.reduce((a, b) => a + b, 0) / 3);
+                        const c = avg >= 90 ? "text-emerald-600" : avg >= 70 ? "text-amber-600" : avg > 0 ? "text-red-600" : "text-muted-foreground";
+                        return <span className={`text-sm font-bold ${c}`}>{avg > 0 ? `${avg}/100` : "Pending"}</span>;
+                      })()}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {selectedSkill.evaluationScores.summary && (
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                        {selectedSkill.evaluationScores.summary}
+                      </p>
+                    )}
                     {[
                       { label: "Security & Safety", val: selectedSkill.evaluationScores.security, icon: Shield },
                       { label: "Compatibility", val: selectedSkill.evaluationScores.compatibility, icon: Puzzle },
@@ -147,14 +162,18 @@ const AdminDashboard = () => {
                     ].map((item) => {
                       const Icon = item.icon;
                       const score = getScore(item.val);
+                      const explanation = getExplanation(item.val);
                       const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : score > 0 ? "text-red-600" : "text-muted-foreground";
                       return (
-                        <div key={item.label} className="space-y-1">
+                        <div key={item.label} className="space-y-1.5">
                           <div className="flex justify-between text-sm">
                             <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{item.label}</span>
                             <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
                           </div>
                           <Progress value={score} className="h-2" />
+                          {explanation && (
+                            <p className="text-xs text-muted-foreground leading-relaxed pl-5">{explanation}</p>
+                          )}
                         </div>
                       );
                     })}
