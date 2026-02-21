@@ -400,33 +400,22 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
       </div>
 
       {/* Terminal log */}
-      <div className="bg-foreground/[0.03] border border-border rounded-lg overflow-hidden">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-border bg-muted/50">
-          <div className="w-2 h-2 rounded-full bg-red-400" />
-          <div className="w-2 h-2 rounded-full bg-amber-400" />
-          <div className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-[10px] text-muted-foreground ml-2 font-mono">evaluation-engine v3.0.0</span>
-          {isPending && stepStatuses.some((s) => s === "running") && (
-            <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground ml-auto" />
-          )}
-        </div>
-        <div ref={logRef} className="p-3 max-h-32 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5">
-          {logLines.map((line, i) => (
-            <div
-              key={i}
-              className={cn(
-                line.startsWith("▸") ? "text-foreground font-semibold mt-1"
-                  : line.includes("✓") ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-muted-foreground"
-              )}
-            >
-              {line}
-            </div>
-          ))}
-          {isPending && stepStatuses.some((s) => s === "running") && (
-            <span className="inline-block w-1.5 h-3.5 bg-primary animate-pulse" />
-          )}
-        </div>
+      <div ref={logRef} className="bg-foreground/[0.03] border border-border rounded-lg p-3 max-h-32 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5">
+        {logLines.map((line, i) => (
+          <div
+            key={i}
+            className={cn(
+              line.startsWith("▸") ? "text-foreground font-semibold mt-1"
+                : line.includes("✓") ? "text-emerald-600 dark:text-emerald-400"
+                : "text-muted-foreground"
+            )}
+          >
+            {line}
+          </div>
+        ))}
+        {isPending && stepStatuses.some((s) => s === "running") && (
+          <span className="inline-block w-1.5 h-3.5 bg-primary animate-pulse" />
+        )}
       </div>
     </div>
   );
