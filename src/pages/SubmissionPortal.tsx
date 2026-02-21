@@ -338,7 +338,7 @@ const SubmissionPortal = () => {
       <Collapsible className="mb-6">
         <Card className="border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-950/20">
           <CollapsibleTrigger className="w-full text-left">
-            <CardHeader className="pb-3">
+            <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Cpu className="h-5 w-5 text-amber-600 dark:text-amber-400" />
