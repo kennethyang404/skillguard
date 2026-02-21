@@ -327,14 +327,21 @@ const SubmissionPortal = () => {
 
   return (
     <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Submit a Skill</h1>
+        <p className="text-muted-foreground mt-1">
+          Submit a new agent skill for review. Use the template form for a consistent format.
+        </p>
+      </div>
+
       {/* Evaluation Process Explainer */}
-      <Collapsible className="mb-8">
-        <Card className="border-primary/20 bg-primary/[0.02]">
+      <Collapsible className="mb-6">
+        <Card className="border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-950/20">
           <CollapsibleTrigger className="w-full text-left">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Cpu className="h-5 w-5 text-primary" />
+                  <Cpu className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <CardTitle className="text-base">How are submitted skills evaluated?</CardTitle>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]_&]:rotate-180" />
@@ -401,7 +408,7 @@ const SubmissionPortal = () => {
                   );
                 })}
               </div>
-              <div className="mt-4 flex items-start gap-2 rounded-md bg-muted/50 p-3">
+              <div className="mt-4 flex items-start gap-2 rounded-md bg-amber-100/50 dark:bg-amber-900/20 p-3">
                 <Scan className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Each category produces an independent score out of 100. Skills must pass all three evaluations
@@ -413,13 +420,6 @@ const SubmissionPortal = () => {
           </CollapsibleContent>
         </Card>
       </Collapsible>
-
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Submit a Skill</h1>
-        <p className="text-muted-foreground mt-1">
-          Submit a new agent skill for review. Use the template form for a consistent format.
-        </p>
-      </div>
 
       <Tabs defaultValue="upload">
         <TabsList className="mb-6">
