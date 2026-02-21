@@ -363,7 +363,8 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
               )}>
                 <div className="px-3 pb-3 pt-1 ml-10 space-y-1.5 border-l-2 border-border ml-[26px]">
                   {step.subSteps.map((sub, j) => {
-                    const subDone = stepStatus === "complete" || (stepStatus === "running" && j < subIdx);
+                    const subDone = stepStatus === "complete" || stepStatus === "failed" || (stepStatus === "running" && j < subIdx);
+                    const subFailed = stepStatus === "failed";
                     const subRunning = stepStatus === "running" && j === subIdx;
                     return (
                       <div
@@ -373,7 +374,9 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
                           subRunning && "bg-primary/5"
                         )}
                       >
-                        {subDone ? (
+                        {subDone && subFailed ? (
+                          <XCircle className="h-3 w-3 text-red-500 shrink-0" />
+                        ) : subDone ? (
                           <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
                         ) : subRunning ? (
                           <Loader2 className="h-3 w-3 text-primary animate-spin shrink-0" />
