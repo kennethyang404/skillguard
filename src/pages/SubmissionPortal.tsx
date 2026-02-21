@@ -10,6 +10,7 @@ import { useSkills } from "@/lib/skills-store";
 import { CATEGORIES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import JSZip from "jszip";
 import { Upload, FileText, Loader2 } from "lucide-react";
 
 const SubmissionPortal = () => {
@@ -124,72 +125,60 @@ const SubmissionPortal = () => {
       );
 
       if (clawhubMatch) {
-        // Use allorigins API to bypass CORS and fetch the ClawHub page
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(fetchUrl)}`;
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error(`Failed to fetch (${response.status})`);
-        const html = await response.text();
+        const slug = clawhubMatch[2];
+        const CONVEX_API = "https://wry-manatee-359.convex.site/api/v1";
 
-        // Parse the HTML to extract the SKILL.md content
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
+        // Helper: try direct fetch, then CORS proxy fallback
+        const corsProxyFetch = async (url: string): Promise<Response> => {
+          try {
+            const direct = await fetch(url);
+            if (direct.ok) return direct;
+          } catch {
+            // CORS blocked, try proxy
+          }
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+          return fetch(proxyUrl);
+        };
 
-        // Look for the SKILL.md content section — ClawHub renders it in a section after "SKILL.md" heading
+        // Fetch skill metadata from ClawHub API
+        const metaResponse = await corsProxyFetch(`${CONVEX_API}/skills/${slug}`);
+        if (!metaResponse.ok) throw new Error("Skill not found on ClawHub.");
+        const meta = await metaResponse.json();
+        const { skill, owner, latestVersion } = meta;
+        const version = latestVersion?.version || "1.0.0";
+
+        // Download the zip and extract SKILL.md
         let skillContent = "";
+        try {
+          const downloadUrl = `${CONVEX_API}/download?slug=${slug}`;
+          const zipResponse = await corsProxyFetch(downloadUrl);
+          if (zipResponse.ok) {
+            const zipBlob = await zipResponse.blob();
+            const zip = await JSZip.loadAsync(zipBlob);
 
-        // Strategy 1: Find a <pre> or <code> block with the skill content
-        const codeBlocks = doc.querySelectorAll("pre code, .skill-md-content, .markdown-body");
-        if (codeBlocks.length > 0) {
-          skillContent = codeBlocks[0].textContent || "";
-        }
+            // Look for SKILL.md in the zip
+            const skillFile =
+              zip.file("SKILL.md") ||
+              zip.file(/SKILL\.md$/i)[0];
 
-        // Strategy 2: Extract from the full page text by finding the SKILL.md section
-        if (!skillContent) {
-          const fullText = doc.body?.textContent || "";
-          const skillMdIndex = fullText.indexOf("SKILL.md");
-          if (skillMdIndex !== -1) {
-            // Find the actual markdown content that starts with "# " after the SKILL.md label
-            const afterSkillMd = fullText.substring(skillMdIndex + 8);
-            const hashIndex = afterSkillMd.indexOf("# ");
-            if (hashIndex !== -1) {
-              // Extract until we hit "Files" or "Comments" section markers
-              let content = afterSkillMd.substring(hashIndex);
-              const endMarkers = ["\nFiles\n", "\nComments\n", "\nSign in to comment"];
-              for (const marker of endMarkers) {
-                const idx = content.indexOf(marker);
-                if (idx !== -1) content = content.substring(0, idx);
-              }
-              skillContent = content.trim();
+            if (skillFile) {
+              skillContent = await skillFile.async("string");
             }
           }
+        } catch (e) {
+          console.warn("Zip download failed, using fallback:", e);
         }
 
-        // Strategy 3: Try fetching the raw file from the download zip API
         if (!skillContent) {
-          throw new Error("Could not extract SKILL.md content from the page.");
+          // Fallback: construct from API metadata
+          skillContent = `# ${skill.displayName}\n\n${skill.summary || ""}\n\n> Imported from ClawHub. Visit ${fetchUrl} for the full SKILL.md content.`;
         }
-
-        // Clean up: normalize whitespace and fix line breaks
-        skillContent = skillContent
-          .replace(/\r\n/g, "\n")
-          .replace(/\n{3,}/g, "\n\n")
-          .trim();
 
         setRawContent(skillContent);
-
-        // Extract metadata from the page
-        const titleEl = doc.querySelector("h1");
-        const descEl = doc.querySelector(".section-subtitle, .skill-hero p");
-        if (titleEl && !rawName) setRawName(titleEl.textContent?.trim() || "");
-        if (descEl && !rawDescription) setRawDescription(descEl.textContent?.trim() || "");
-
-        // Extract author
-        const authorEl = doc.querySelector(".user-name");
-        if (authorEl && !rawAuthor) setRawAuthor(authorEl.textContent?.trim() || "");
-
-        // Extract version
-        const versionMatch = html.match(/version\s*\*?\*?v?([\d.]+)/i);
-        if (versionMatch) setRawVersion(versionMatch[1]);
+        if (!rawName) setRawName(skill.displayName || slug);
+        if (!rawDescription) setRawDescription(skill.summary || "");
+        if (!rawAuthor) setRawAuthor(owner?.displayName || owner?.handle || "");
+        setRawVersion(version);
 
         toast.success("Skill imported from ClawHub!");
         return;
@@ -209,24 +198,23 @@ const SubmissionPortal = () => {
         fetchUrl = `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
       }
 
-      // For non-ClawHub URLs, try direct fetch (works for raw URLs and GitHub raw)
-      const response = await fetch(fetchUrl);
-      if (!response.ok) {
-        // Fallback: try via CORS proxy
-        const proxyResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(fetchUrl)}`);
+      // For non-ClawHub URLs, try direct fetch then proxy fallback
+      let text = "";
+      try {
+        const response = await fetch(fetchUrl);
+        if (!response.ok) throw new Error("Direct fetch failed");
+        text = await response.text();
+      } catch {
+        const proxyResponse = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(fetchUrl)}`
+        );
         if (!proxyResponse.ok) throw new Error(`Failed to fetch (${proxyResponse.status})`);
-        const text = await proxyResponse.text();
-        setRawContent(text);
-      } else {
-        const text = await response.text();
-        setRawContent(text);
+        text = await proxyResponse.text();
       }
 
-      // Try to extract title from markdown heading
-      const titleMatch = rawContent.match(/^#\s+(.+)$/m);
-      if (titleMatch && !rawName) {
-        setRawName(titleMatch[1].trim());
-      }
+      setRawContent(text);
+      const titleMatch = text.match(/^#\s+(.+)$/m);
+      if (titleMatch && !rawName) setRawName(titleMatch[1].trim());
 
       toast.success("Skill imported successfully!");
     } catch (error) {
@@ -237,6 +225,103 @@ const SubmissionPortal = () => {
     } finally {
       setIsImporting(false);
     }
+  };
+
+  /** Convert a rendered HTML element back to approximate markdown */
+  const htmlToMarkdown = (el: Element): string => {
+    const lines: string[] = [];
+
+    const walk = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        if (text.trim()) lines.push(text);
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      const tag = (node as Element).tagName.toLowerCase();
+
+      switch (tag) {
+        case "h1":
+          lines.push(`\n# ${node.textContent?.trim()}`);
+          break;
+        case "h2":
+          lines.push(`\n## ${node.textContent?.trim()}`);
+          break;
+        case "h3":
+          lines.push(`\n### ${node.textContent?.trim()}`);
+          break;
+        case "p": {
+          const parts: string[] = [];
+          node.childNodes.forEach((child) => {
+            if (child.nodeType === Node.TEXT_NODE) {
+              parts.push(child.textContent || "");
+            } else if (
+              child.nodeType === Node.ELEMENT_NODE &&
+              (child as Element).tagName.toLowerCase() === "code"
+            ) {
+              parts.push(`\`${child.textContent}\``);
+            } else if (
+              child.nodeType === Node.ELEMENT_NODE &&
+              (child as Element).tagName.toLowerCase() === "strong"
+            ) {
+              parts.push(`**${child.textContent}**`);
+            } else {
+              parts.push(child.textContent || "");
+            }
+          });
+          lines.push(`\n${parts.join("")}`);
+          break;
+        }
+        case "ul": {
+          node.childNodes.forEach((li) => {
+            if (
+              li.nodeType === Node.ELEMENT_NODE &&
+              (li as Element).tagName.toLowerCase() === "li"
+            ) {
+              const parts: string[] = [];
+              li.childNodes.forEach((child) => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                  parts.push(child.textContent || "");
+                } else if (
+                  child.nodeType === Node.ELEMENT_NODE &&
+                  (child as Element).tagName.toLowerCase() === "code"
+                ) {
+                  parts.push(`\`${child.textContent}\``);
+                } else {
+                  parts.push(child.textContent || "");
+                }
+              });
+              lines.push(`- ${parts.join("").trim()}`);
+            }
+          });
+          break;
+        }
+        case "ol": {
+          let idx = 1;
+          node.childNodes.forEach((li) => {
+            if (
+              li.nodeType === Node.ELEMENT_NODE &&
+              (li as Element).tagName.toLowerCase() === "li"
+            ) {
+              lines.push(`${idx}. ${li.textContent?.trim()}`);
+              idx++;
+            }
+          });
+          break;
+        }
+        case "pre":
+          lines.push(`\n\`\`\`\n${node.textContent?.trim()}\n\`\`\``);
+          break;
+        default:
+          node.childNodes.forEach(walk);
+      }
+    };
+
+    el.childNodes.forEach(walk);
+    return lines
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
   };
 
   return (
