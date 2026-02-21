@@ -1,73 +1,22 @@
-# Welcome to your Lovable project
+# SkillGuard
 
-## Project info
+[Live Demo](https://skillguard.lovable.app/)
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+*SkillGuard* is an enterprise platform that automatically evaluates, scores, and governs AI Agent Skills before they are deployed into corporate environments.
 
-## How can I edit this code?
+## The Problem: The "ClawHavoc" Vulnerability
+Agent Skills are often just Markdown files (SKILL.md). To a human, it's text. To an AI Agent, it is executable intent.
 
-There are several ways of editing your application.
+Recent supply chain attacks on open-source agent hubs (like the "[ClawHavoc](https://cybersecuritynews.com/clawhavoc-poisoned-openclaws-clawhub/)" incident) demonstrated how easily malicious actors can upload skills containing prompt injections. These hidden instructions trick internal AI agents into exfiltrating API keys, bypassing network restrictions, or executing malicious code. Enterprises want the power of open-source agent skills, but they cannot risk the security vulnerabilities.
 
-**Use Lovable**
+## The Solution: Zero-Trust Skill Governance
+*SkillGuard* provides a secure internal marketplace for enterprises. Developers can submit or import SKILL.md files, which are immediately intercepted by our Auto-Rater Pipeline. The pipeline rigorously evaluates the prompt for security risks, credential mishandling, and capability alignment, outputting a strict "Pass/Fail" scorecard.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Architecture
+We build an agentic evaluation pipeline for skill evaluations.
 
-Changes made via Lovable will be committed automatically to this repo.
+Frontend Skill Marketplace (Powered by Lovable.dev): We utilized Lovable to rapidly vibe-code a high-fidelity enterprise dashboard. This allowed us to focus on the backend complexity while still delivering a polished UI featuring real-time evaluation loading states and interactive Markdown diffs.
 
-**Use your preferred IDE**
+Auto-Rater Pipeline (Powered by Dust.tt): The core brain of *SkillGuard*. We built a custom agent on Dust that ingests raw Markdown and runs a multi-step semantic analysis. It simulates the intent of the prompt against a strict corporate security rubric.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+We use the Gemini API key as a custom LLM backend for the Dust agent.
