@@ -122,7 +122,7 @@ const SkillDetail = () => {
                       </span>
                       <span className={`font-semibold ${color}`}>{score}/100</span>
                     </div>
-                    <Progress value={score} className="h-2" />
+                    <Progress value={score} className="h-2" indicatorClassName={score >= 90 ? "bg-emerald-500" : score >= 70 ? "bg-amber-500" : "bg-red-500"} />
                     {explanation && (
                       <p className="text-xs text-muted-foreground leading-relaxed pl-5">
                         {explanation}
