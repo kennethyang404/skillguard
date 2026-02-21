@@ -32,8 +32,11 @@ const EVAL_ICONS: Record<string, React.ElementType> = {
 const AdminDashboard = () => {
   const { skills, updateSkillStatus } = useSkills();
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+
+  // Derive selectedSkill from live skills array so it refreshes when evaluation completes
+  const selectedSkill = selectedSkillId ? skills.find((s) => s.id === selectedSkillId) ?? null : null;
 
   const filtered = useMemo(() => {
     if (statusFilter === "all") return skills;
@@ -43,14 +46,14 @@ const AdminDashboard = () => {
   const handleApprove = (skill: Skill) => {
     updateSkillStatus(skill.id, "approved", adminNotes || undefined);
     toast.success(`"${skill.title}" approved.`);
-    setSelectedSkill(null);
+    setSelectedSkillId(null);
     setAdminNotes("");
   };
 
   const handleReject = (skill: Skill) => {
     updateSkillStatus(skill.id, "rejected", adminNotes || undefined);
     toast.error(`"${skill.title}" rejected.`);
-    setSelectedSkill(null);
+    setSelectedSkillId(null);
     setAdminNotes("");
   };
 
@@ -100,7 +103,7 @@ const AdminDashboard = () => {
           </TableHeader>
           <TableBody>
             {filtered.map((skill) => (
-              <TableRow key={skill.id} className="cursor-pointer" onClick={() => { setSelectedSkill(skill); setAdminNotes(skill.adminNotes || ""); }}>
+              <TableRow key={skill.id} className="cursor-pointer" onClick={() => { setSelectedSkillId(skill.id); setAdminNotes(skill.adminNotes || ""); }}>
                 <TableCell className="font-medium">{skill.title}</TableCell>
                 <TableCell>{skill.author}</TableCell>
                 <TableCell>{skill.category}</TableCell>
@@ -128,7 +131,7 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Detail Dialog */}
-      <Dialog open={!!selectedSkill} onOpenChange={(open) => { if (!open) setSelectedSkill(null); }}>
+      <Dialog open={!!selectedSkill} onOpenChange={(open) => { if (!open) setSelectedSkillId(null); }}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           {selectedSkill && (
             <>
