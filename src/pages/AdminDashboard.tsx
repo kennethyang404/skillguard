@@ -217,7 +217,7 @@ const AdminDashboard = () => {
                   <Card>
                     <CollapsibleTrigger className="w-full">
                       <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-sm">SKILL.md Preview</CardTitle>
+                        <CardTitle className="text-sm">Skill Content</CardTitle>
                         <ChevronDown className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                     </CollapsibleTrigger>
