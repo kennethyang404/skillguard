@@ -233,22 +233,13 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
   const [activeSubStepIdx, setActiveSubStepIdx] = useState<Record<number, number>>({});
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [stepStartTimes, setStepStartTimes] = useState<Record<number, number>>({});
-  const [logLines, setLogLines] = useState<string[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
-  }, [logLines]);
 
   useEffect(() => {
     if (!isPending) {
       const completed = PIPELINE_STEPS.flatMap((step) => [
         `▸ ${step.label}`,
-        ...step.subSteps.map((s) => `  ✓ ${s} — done`),
       ]);
-      setLogLines(completed);
       return;
     }
 
@@ -260,19 +251,13 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
         setStepStatuses((p) => p.map((s, idx) => (idx === i ? "running" : s)));
         setStepStartTimes((p) => ({ ...p, [i]: Date.now() }));
         setExpandedStep(i);
-        setLogLines((p) => [...p, `▸ ${step.label}`]);
+        setExpandedStep(i);
 
         for (let j = 0; j < step.subSteps.length; j++) {
           if (cancelled) return;
           setActiveSubStepIdx((p) => ({ ...p, [i]: j }));
-          setLogLines((p) => [...p, `  ◦ ${step.subSteps[j]}…`]);
           await new Promise((r) => setTimeout(r, step.durationMs / step.subSteps.length));
           if (cancelled) return;
-          setLogLines((p) => {
-            const u = [...p];
-            u[u.length - 1] = `  ✓ ${step.subSteps[j]} — done`;
-            return u;
-          });
         }
 
         setStepStatuses((p) => p.map((s, idx) => (idx === i ? "complete" : s)));
@@ -399,24 +384,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
         })}
       </div>
 
-      {/* Terminal log */}
-      <div ref={logRef} className="bg-foreground/[0.03] border border-border rounded-lg p-3 max-h-32 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5">
-        {logLines.map((line, i) => (
-          <div
-            key={i}
-            className={cn(
-              line.startsWith("▸") ? "text-foreground font-semibold mt-1"
-                : line.includes("✓") ? "text-emerald-600 dark:text-emerald-400"
-                : "text-muted-foreground"
-            )}
-          >
-            {line}
-          </div>
-        ))}
-        {isPending && stepStatuses.some((s) => s === "running") && (
-          <span className="inline-block w-1.5 h-3.5 bg-primary animate-pulse" />
-        )}
-      </div>
     </div>
   );
 }
