@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useSkills } from "@/lib/skills-store";
 import { CATEGORIES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import JSZip from "jszip";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, FileText, Loader2, ChevronDown, Shield, Cpu, Puzzle, Sparkles, CheckCircle2, Scan } from "lucide-react";
 
 const SubmissionPortal = () => {
   const { addSkill } = useSkills();
@@ -326,6 +327,93 @@ const SubmissionPortal = () => {
 
   return (
     <div>
+      {/* Evaluation Process Explainer */}
+      <Collapsible className="mb-8">
+        <Card className="border-primary/20 bg-primary/[0.02]">
+          <CollapsibleTrigger className="w-full text-left">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-base">How are submitted skills evaluated?</CardTitle>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]_&]:rotate-180" />
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Every submission undergoes a rigorous, multi-stage automated AI evaluation pipeline before human review.
+              </p>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 pb-6">
+              <div className="grid md:grid-cols-3 gap-4 mt-2">
+                {[
+                  {
+                    icon: Shield,
+                    title: "Security & Safety Analysis",
+                    steps: [
+                      "Injection vector scanning",
+                      "Privilege escalation detection",
+                      "Data exfiltration pattern matching",
+                      "Sandbox escape analysis",
+                      "Dependency vulnerability audit",
+                    ],
+                  },
+                  {
+                    icon: Puzzle,
+                    title: "Enterprise Compatibility",
+                    steps: [
+                      "Schema conformance validation",
+                      "API surface compatibility check",
+                      "Version constraint resolution",
+                      "Cross-platform runtime testing",
+                      "Integration conflict detection",
+                    ],
+                  },
+                  {
+                    icon: Sparkles,
+                    title: "Quality & Capability",
+                    steps: [
+                      "Instruction clarity scoring",
+                      "Edge-case coverage analysis",
+                      "Output consistency benchmarking",
+                      "Performance profiling",
+                      "Confidence interval computation",
+                    ],
+                  },
+                ].map((category) => {
+                  const Icon = category.icon;
+                  return (
+                    <div key={category.title} className="rounded-lg border bg-card p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-semibold">{category.title}</span>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {category.steps.map((step) => (
+                          <li key={step} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <CheckCircle2 className="h-3 w-3 mt-0.5 text-primary/50 shrink-0" />
+                            {step}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex items-start gap-2 rounded-md bg-muted/50 p-3">
+                <Scan className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Each category produces an independent score out of 100. Skills must pass all three evaluations
+                  to be approved. The entire pipeline runs autonomously — admin reviewers see the full report
+                  with detailed explanations and can override decisions when necessary.
+                </p>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Submit a Skill</h1>
         <p className="text-muted-foreground mt-1">
