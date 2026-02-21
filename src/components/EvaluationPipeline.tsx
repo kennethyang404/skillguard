@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { getScore } from "@/lib/types";
+import { getScore, EVALUATION_KEYS } from "@/lib/types";
 import type { EvaluationScores } from "@/lib/types";
 import {
   Shield, Puzzle, Sparkles, FileSearch, Binary, Network,
-  CheckCircle2, Loader2, Cpu, Scan, Lock, GitBranch,
-  Fingerprint, Zap, Clock, ChevronRight, Circle, XCircle,
+  CheckCircle2, Loader2, Clock, ChevronRight, Circle, XCircle,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,55 +21,82 @@ const PIPELINE_STEPS: PipelineStep[] = [
   {
     id: "parse",
     label: "Parse & Validate",
-    sublabel: "SKILL.md structure",
+    sublabel: "SKILL.md + bash structure",
     icon: FileSearch,
     subSteps: [
       "Parsing markdown AST",
       "Validating section headers",
       "Extracting procedure steps",
+      "Parsing bash script (if provided)",
       "Checking schema compliance",
     ],
     durationMs: 1800,
   },
   {
     id: "security",
-    label: "Security Analysis",
-    sublabel: "Threat & risk scan",
+    label: "Security & Safety",
+    sublabel: "Injection, RCE, obfuscation",
     icon: Shield,
     subSteps: [
-      "Scanning for injection vectors",
-      "Analyzing permission boundaries",
-      "Checking data exposure risks",
-      "Evaluating credential handling",
-      "Assessing sandboxing requirements",
+      "Scanning for curl|bash / wget|sh patterns",
+      "Detecting prompt injection vectors",
+      "Checking for obfuscated scripts (base64, eval)",
+      "Analyzing unsafe command execution",
+      "Detecting remote code download patterns",
     ],
     durationMs: 2800,
   },
   {
+    id: "credentials",
+    label: "Credential Handling",
+    sublabel: "Secrets & key management",
+    icon: KeyRound,
+    subSteps: [
+      "Checking for secrets in chat/CLI history",
+      "Validating env var / secret manager usage",
+      "Detecting secrets printed to stdout",
+      "Verifying credential scope minimization",
+    ],
+    durationMs: 1800,
+  },
+  {
     id: "compatibility",
-    label: "Compatibility Check",
-    sublabel: "Enterprise readiness",
+    label: "Enterprise Compatibility",
+    sublabel: "Corp environment readiness",
     icon: Puzzle,
     subSteps: [
-      "Testing platform integrations",
-      "Validating API contract schemas",
-      "Checking version constraints",
-      "Assessing cross-env portability",
+      "Checking for sudo/root requirements",
+      "Detecting system config modifications",
+      "Validating proxy/cert compatibility",
+      "Assessing restricted package installs",
     ],
     durationMs: 2200,
   },
   {
     id: "quality",
-    label: "Quality Assessment",
-    sublabel: "Capability scoring",
+    label: "Quality & Capability",
+    sublabel: "Scope, clarity, alignment",
     icon: Sparkles,
     subSteps: [
-      "Measuring procedure completeness",
-      "Evaluating verification criteria",
-      "Analyzing edge case coverage",
-      "Computing quality confidence",
+      "Evaluating persona & scope definition",
+      "Checking constraint clarity",
+      "Verifying SKILL.md ↔ bash alignment",
+      "Assessing auditability & safe defaults",
     ],
     durationMs: 2400,
+  },
+  {
+    id: "networkEgress",
+    label: "Network Egress & Data Disclosure",
+    sublabel: "Outbound traffic analysis",
+    icon: Network,
+    subSteps: [
+      "Enumerating outbound network actions",
+      "Classifying download vs upload vs RCE",
+      "Checking documentation alignment",
+      "Flagging undisclosed data transmission",
+    ],
+    durationMs: 2000,
   },
   {
     id: "report",
@@ -78,7 +105,7 @@ const PIPELINE_STEPS: PipelineStep[] = [
     icon: Binary,
     subSteps: [
       "Aggregating category scores",
-      "Generating explanations",
+      "Generating per-section explanations",
       "Computing overall assessment",
       "Finalizing evaluation report",
     ],
@@ -96,19 +123,18 @@ interface EvaluationPipelineProps {
 
 /* ─── Compact (cards) ─── */
 function CompactPipeline({ scores, status }: { scores: EvaluationScores; status: string }) {
-  const overallScore = Math.round(
-    [scores.security, scores.compatibility, scores.quality].map(getScore).reduce((a, b) => a + b, 0) / 3
-  );
+  const scoreValues = EVALUATION_KEYS.map((k) => getScore(scores[k]));
+  const overallScore = Math.round(scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length);
   const isPending = status === "pending";
   const [activeDot, setActiveDot] = useState(0);
 
   useEffect(() => {
     if (!isPending) return;
-    const id = setInterval(() => setActiveDot((d) => (d + 1) % 5), 600);
+    const id = setInterval(() => setActiveDot((d) => (d + 1) % PIPELINE_STEPS.length), 600);
     return () => clearInterval(id);
   }, [isPending]);
 
-  const icons = [FileSearch, Shield, Puzzle, Sparkles, Binary];
+  const icons = PIPELINE_STEPS.map((s) => s.icon);
 
   if (isPending) {
     return (
@@ -186,7 +212,6 @@ function StatusIcon({ status, icon: Icon }: { status: StepStatus; icon: React.El
     case "running":
       return (
         <div className="relative w-7 h-7 flex items-center justify-center">
-          {/* spinning ring */}
           <svg className="absolute inset-0 w-7 h-7 animate-spin" viewBox="0 0 28 28">
             <circle cx="14" cy="14" r="12" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="50 26" strokeLinecap="round" />
           </svg>
@@ -224,7 +249,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
   const [logLines, setLogLines] = useState<string[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll log
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -276,7 +300,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
 
   return (
     <div className="space-y-3">
-      {/* Header bar — GitHub CI style */}
       <div className={cn(
         "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border",
         isPending
@@ -300,7 +323,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
         </span>
       </div>
 
-      {/* Steps list */}
       <div className="border border-border rounded-lg overflow-hidden divide-y divide-border">
         {PIPELINE_STEPS.map((step, i) => {
           const Icon = step.icon;
@@ -310,7 +332,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
 
           return (
             <div key={step.id}>
-              {/* Step row */}
               <button
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/50",
@@ -344,7 +365,6 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
                 )} />
               </button>
 
-              {/* Expanded sub-steps */}
               <div className={cn(
                 "overflow-hidden transition-all duration-300",
                 isExpanded ? "max-h-[500px]" : "max-h-0"
@@ -398,7 +418,7 @@ function FullPipeline({ scores, status }: { scores: EvaluationScores; status: st
           <div className="w-2 h-2 rounded-full bg-red-400" />
           <div className="w-2 h-2 rounded-full bg-amber-400" />
           <div className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-[10px] text-muted-foreground ml-2 font-mono">evaluation-engine v2.4.1</span>
+          <span className="text-[10px] text-muted-foreground ml-2 font-mono">evaluation-engine v3.0.0</span>
           {isPending && stepStatuses.some((s) => s === "running") && (
             <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground ml-auto" />
           )}
