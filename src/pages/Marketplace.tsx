@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useSkills } from "@/lib/skills-store";
 import { SkillCard } from "@/components/SkillCard";
 import { Input } from "@/components/ui/input";
@@ -7,10 +8,16 @@ import { CATEGORIES } from "@/lib/mock-data";
 import { Search } from "lucide-react";
 
 const Marketplace = () => {
+  const [searchParams] = useSearchParams();
   const { skills } = useSkills();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("popular");
+
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q) setSearch(q);
+  }, [searchParams]);
 
   const approvedSkills = useMemo(() => {
     let filtered = skills.filter((s) => s.status === "approved");

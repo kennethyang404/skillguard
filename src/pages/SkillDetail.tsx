@@ -76,7 +76,9 @@ const SkillDetail = () => {
             <p className="mt-3">{skill.description}</p>
             <div className="flex flex-wrap gap-1.5 mt-3">
               {skill.tags.map((tag) => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
+                <Link key={tag} to={`/marketplace?search=${encodeURIComponent(tag)}`}>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-accent transition-colors">{tag}</Badge>
+                </Link>
               ))}
             </div>
           </div>
