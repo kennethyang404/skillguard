@@ -12,7 +12,7 @@ import { CATEGORIES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import JSZip from "jszip";
-import { Upload, FileText, Loader2, ChevronDown, Target, Cpu, BookOpen, Package, CheckCircle2, Scan, KeyRound, Lock, Terminal } from "lucide-react";
+import { Upload, FileText, Loader2, ChevronDown, Shield, Cpu, Puzzle, Sparkles, CheckCircle2, Scan, KeyRound, Network, Terminal } from "lucide-react";
 
 const SubmissionPortal = () => {
   const { addSkill } = useSkills();
@@ -72,7 +72,7 @@ const SubmissionPortal = () => {
       category: tCategory,
       markdownContent: generatedMarkdown,
       bashScript: tBashScript || undefined,
-      evaluationScores: { purposeCapability: 0, instructionScope: 0, installMechanism: 0, credentials: 0, persistencePrivilege: 0 },
+      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0, networkEgress: 0 },
       submissionMethod: "template",
     });
     toast.success("Skill submitted for review!");
@@ -95,7 +95,7 @@ const SubmissionPortal = () => {
       category: rawCategory,
       markdownContent: rawContent,
       bashScript: rawBashScript || undefined,
-      evaluationScores: { purposeCapability: 0, instructionScope: 0, installMechanism: 0, credentials: 0, persistencePrivilege: 0 },
+      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0, networkEgress: 0 },
       submissionMethod: "upload",
     });
     toast.success("Skill submitted for review!");
@@ -376,38 +376,18 @@ const SubmissionPortal = () => {
               <div className="grid md:grid-cols-3 gap-4 mt-2">
                 {[
                   {
-                    icon: Target,
-                    title: "Purpose & Capability",
+                    icon: Shield,
+                    title: "Security & Safety",
                     steps: [
-                      "Name/description vs SKILL.md action alignment",
-                      "Undeclared binary/env var detection",
-                      "Requirement proportionality validation",
-                      "Scope inconsistency flagging",
-                    ],
-                  },
-                  {
-                    icon: BookOpen,
-                    title: "Instruction Scope",
-                    steps: [
-                      "Unrelated file read detection",
-                      "Env var access boundary validation",
-                      "Network endpoint scope verification",
-                      "Instruction proportionality assessment",
-                    ],
-                  },
-                  {
-                    icon: Package,
-                    title: "Install Mechanism",
-                    steps: [
-                      "Install spec and code file detection",
-                      "Third-party tap/registry risk assessment",
-                      "Binary source and integrity validation",
-                      "Install footprint risk scoring",
+                      "curl|bash / remote code execution detection",
+                      "Prompt injection vulnerability scanning",
+                      "Obfuscated script detection (base64, eval)",
+                      "Unsafe command execution analysis",
                     ],
                   },
                   {
                     icon: KeyRound,
-                    title: "Credentials",
+                    title: "Credential Handling",
                     steps: [
                       "API key exposure in chat/CLI detection",
                       "Environment variable usage validation",
@@ -416,13 +396,33 @@ const SubmissionPortal = () => {
                     ],
                   },
                   {
-                    icon: Lock,
-                    title: "Persistence & Privilege",
+                    icon: Puzzle,
+                    title: "Enterprise Compatibility",
                     steps: [
-                      "Always/persistence flag detection",
-                      "Sudo/root requirement scanning",
+                      "Sudo/root requirement detection",
                       "System config modification analysis",
-                      "Autonomous invocation risk assessment",
+                      "Proxy & cert pinning compatibility",
+                      "Restricted package install validation",
+                    ],
+                  },
+                  {
+                    icon: Sparkles,
+                    title: "Quality & Capability",
+                    steps: [
+                      "Persona & scope definition scoring",
+                      "Constraint clarity evaluation",
+                      "SKILL.md ↔ bash code alignment",
+                      "Auditability & safe defaults check",
+                    ],
+                  },
+                  {
+                    icon: Network,
+                    title: "Network Egress & Data Disclosure",
+                    steps: [
+                      "Outbound network action enumeration",
+                      "Download vs upload classification",
+                      "Documentation alignment verification",
+                      "Undisclosed data transmission flagging",
                     ],
                   },
                 ].map((category) => {

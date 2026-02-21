@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { getScore, getSeverityColor, EVALUATION_KEYS } from "@/lib/types";
+import { getScore, EVALUATION_KEYS } from "@/lib/types";
 import type { EvaluationScores } from "@/lib/types";
 import {
-  Target, BookOpen, Package, KeyRound, Lock,
-  FileSearch, Binary,
+  Shield, Puzzle, Sparkles, FileSearch, Binary, Network,
   CheckCircle2, Loader2, Clock, ChevronRight, Circle, XCircle,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,47 +33,22 @@ const PIPELINE_STEPS: PipelineStep[] = [
     durationMs: 1800,
   },
   {
-    id: "purposeCapability",
-    label: "Purpose & Capability",
-    sublabel: "Name, description, action alignment",
-    icon: Target,
+    id: "security",
+    label: "Security & Safety",
+    sublabel: "Injection, RCE, obfuscation",
+    icon: Shield,
     subSteps: [
-      "Comparing name/description to SKILL.md actions",
-      "Checking for undeclared binaries or env vars",
-      "Validating proportionality of requirements",
-      "Detecting scope inconsistencies",
+      "Scanning for curl|bash / wget|sh patterns",
+      "Detecting prompt injection vectors",
+      "Checking for obfuscated scripts (base64, eval)",
+      "Analyzing unsafe command execution",
+      "Detecting remote code download patterns",
     ],
-    durationMs: 2200,
-  },
-  {
-    id: "instructionScope",
-    label: "Instruction Scope",
-    sublabel: "Runtime instruction boundaries",
-    icon: BookOpen,
-    subSteps: [
-      "Checking for unrelated file reads",
-      "Detecting env var access outside scope",
-      "Validating network endpoint scope",
-      "Assessing instruction proportionality",
-    ],
-    durationMs: 1800,
-  },
-  {
-    id: "installMechanism",
-    label: "Install Mechanism",
-    sublabel: "Disk & download risk",
-    icon: Package,
-    subSteps: [
-      "Checking for install specs and code files",
-      "Detecting third-party tap/registry installs",
-      "Validating binary sources and integrity",
-      "Assessing install footprint risk",
-    ],
-    durationMs: 2000,
+    durationMs: 2800,
   },
   {
     id: "credentials",
-    label: "Credentials",
+    label: "Credential Handling",
     sublabel: "Secrets & key management",
     icon: KeyRound,
     subSteps: [
@@ -85,15 +60,41 @@ const PIPELINE_STEPS: PipelineStep[] = [
     durationMs: 1800,
   },
   {
-    id: "persistencePrivilege",
-    label: "Persistence & Privilege",
-    sublabel: "System modification risk",
-    icon: Lock,
+    id: "compatibility",
+    label: "Enterprise Compatibility",
+    sublabel: "Corp environment readiness",
+    icon: Puzzle,
     subSteps: [
-      "Checking always/persistence flags",
-      "Detecting sudo/root requirements",
-      "Scanning for system config modifications",
-      "Assessing autonomous invocation risk",
+      "Checking for sudo/root requirements",
+      "Detecting system config modifications",
+      "Validating proxy/cert compatibility",
+      "Assessing restricted package installs",
+    ],
+    durationMs: 2200,
+  },
+  {
+    id: "quality",
+    label: "Quality & Capability",
+    sublabel: "Scope, clarity, alignment",
+    icon: Sparkles,
+    subSteps: [
+      "Evaluating persona & scope definition",
+      "Checking constraint clarity",
+      "Verifying SKILL.md ↔ bash alignment",
+      "Assessing auditability & safe defaults",
+    ],
+    durationMs: 2400,
+  },
+  {
+    id: "networkEgress",
+    label: "Network Egress & Data Disclosure",
+    sublabel: "Outbound traffic analysis",
+    icon: Network,
+    subSteps: [
+      "Enumerating outbound network actions",
+      "Classifying download vs upload vs RCE",
+      "Checking documentation alignment",
+      "Flagging undisclosed data transmission",
     ],
     durationMs: 2000,
   },
@@ -103,7 +104,7 @@ const PIPELINE_STEPS: PipelineStep[] = [
     sublabel: "Final synthesis",
     icon: Binary,
     subSteps: [
-      "Aggregating severity scores",
+      "Aggregating category scores",
       "Generating per-section explanations",
       "Computing overall assessment",
       "Finalizing evaluation report",
@@ -123,7 +124,7 @@ interface EvaluationPipelineProps {
 /* ─── Compact (cards) ─── */
 function CompactPipeline({ scores, status }: { scores: EvaluationScores; status: string }) {
   const scoreValues = EVALUATION_KEYS.map((k) => getScore(scores[k]));
-  const avgSeverity = Math.round(scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length);
+  const overallScore = Math.round(scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length);
   const isPending = status === "pending";
   const [activeDot, setActiveDot] = useState(0);
 
@@ -160,8 +161,7 @@ function CompactPipeline({ scores, status }: { scores: EvaluationScores; status:
     );
   }
 
-  // For severity: lower = greener bar (inverted)
-  const barColor = avgSeverity <= 25 ? "bg-emerald-500" : avgSeverity <= 45 ? "bg-amber-500" : "bg-red-500";
+  const color = overallScore >= 90 ? "bg-emerald-500" : overallScore >= 70 ? "bg-amber-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-2 mt-2">
       <div className="flex items-center gap-0.5">
@@ -175,9 +175,9 @@ function CompactPipeline({ scores, status }: { scores: EvaluationScores; status:
         ))}
       </div>
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-        <div className={cn("h-full rounded-full transition-all", barColor)} style={{ width: `${100 - avgSeverity}%` }} />
+        <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${overallScore}%` }} />
       </div>
-      <span className="text-[10px] font-semibold text-muted-foreground">{avgSeverity}</span>
+      <span className="text-[10px] font-semibold text-muted-foreground">{overallScore}</span>
     </div>
   );
 }
