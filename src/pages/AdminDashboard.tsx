@@ -186,7 +186,7 @@ const AdminDashboard = () => {
                             <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{EVALUATION_LABELS[key]}</span>
                             <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
                           </div>
-                          <Progress value={score} className="h-2" />
+                          <Progress value={score} className="h-2" indicatorClassName={score >= 90 ? "bg-emerald-500" : score >= 70 ? "bg-amber-500" : "bg-red-500"} />
                           {explanation && (
                             <p className="text-xs text-muted-foreground leading-relaxed pl-5">{explanation}</p>
                           )}
