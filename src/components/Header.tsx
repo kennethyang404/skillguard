@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { useSkills } from "@/lib/skills-store";
 import { Shield, Package, Upload, LayoutDashboard } from "lucide-react";
@@ -6,6 +6,7 @@ import { Shield, Package, Upload, LayoutDashboard } from "lucide-react";
 export function Header() {
   const { role, setRole } = useSkills();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navItems = [
     { to: "/", label: "Marketplace", icon: Package },
@@ -51,7 +52,13 @@ export function Header() {
           </span>
           <Switch
             checked={role === "admin"}
-            onCheckedChange={(checked) => setRole(checked ? "admin" : "employee")}
+            onCheckedChange={(checked) => {
+              const newRole = checked ? "admin" : "employee";
+              setRole(newRole);
+              if (newRole === "employee" && location.pathname === "/admin") {
+                navigate("/");
+              }
+            }}
           />
           <span className={`font-medium ${role === "admin" ? "text-foreground" : "text-muted-foreground"}`}>
             Admin
