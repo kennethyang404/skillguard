@@ -164,8 +164,8 @@ const SkillDetail = () => {
           <div className="hidden lg:block h-[4.5rem]" />
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <Button className="w-full" onClick={handleInstall}>
-                <Download className="h-4 w-4 mr-2" /> Install Skill
+              <Button className="w-full justify-center" onClick={handleInstall}>
+                <Download className="h-4 w-4 mr-2" /> Download Skill
               </Button>
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
