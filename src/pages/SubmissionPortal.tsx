@@ -10,7 +10,7 @@ import { useSkills } from "@/lib/skills-store";
 import { CATEGORIES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Upload, FileText } from "lucide-react";
+import { Upload, FileText, Loader2 } from "lucide-react";
 
 const SubmissionPortal = () => {
   const { addSkill } = useSkills();
@@ -109,10 +109,51 @@ const SubmissionPortal = () => {
     reader.readAsText(file);
   };
 
-  const handleClawhubImport = () => {
-    if (!clawhubUrl) return;
-    setRawContent(`# Imported Skill\n\nImported from ClawHub: ${clawhubUrl}\n\n> This is a simulated import. In production, the skill content would be fetched from ClawHub.`);
-    toast.info("Simulated import from ClawHub.");
+  const [isImporting, setIsImporting] = useState(false);
+
+  const handleClawhubImport = async () => {
+    if (!clawhubUrl.trim()) return;
+    setIsImporting(true);
+
+    try {
+      // Convert GitHub URLs to raw content URLs
+      let fetchUrl = clawhubUrl.trim();
+      const ghMatch = fetchUrl.match(
+        /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/
+      );
+      if (ghMatch) {
+        fetchUrl = `https://raw.githubusercontent.com/${ghMatch[1]}/${ghMatch[2]}/${ghMatch[3]}`;
+      }
+      // Also handle gist URLs
+      const gistMatch = fetchUrl.match(
+        /^https?:\/\/gist\.github\.com\/([^/]+)\/([a-f0-9]+)\/?$/
+      );
+      if (gistMatch) {
+        fetchUrl = `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
+      }
+
+      const response = await fetch(fetchUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch (${response.status})`);
+      }
+      const text = await response.text();
+      setRawContent(text);
+
+      // Try to extract title from markdown heading
+      const titleMatch = text.match(/^#\s+(.+)$/m);
+      if (titleMatch && !rawName) {
+        setRawName(titleMatch[1].trim());
+      }
+
+      toast.success("Skill imported successfully!");
+    } catch (error) {
+      console.error("Import error:", error);
+      toast.error(
+        "Failed to import. Make sure the URL points to a publicly accessible raw markdown file or a GitHub file URL."
+      );
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   return (
@@ -239,8 +280,10 @@ const SubmissionPortal = () => {
               </div>
 
               <div className="flex gap-2">
-                <Input value={clawhubUrl} onChange={(e) => setClawhubUrl(e.target.value)} placeholder="ClawHub skill URL or ID" />
-                <Button variant="outline" onClick={handleClawhubImport}>Import</Button>
+                <Input value={clawhubUrl} onChange={(e) => setClawhubUrl(e.target.value)} placeholder="GitHub URL or raw markdown URL" />
+                <Button variant="outline" onClick={handleClawhubImport} disabled={isImporting}>
+                  {isImporting ? <><Loader2 className="h-4 w-4 animate-spin" /> Importing...</> : "Import"}
+                </Button>
               </div>
 
               {rawContent && (
