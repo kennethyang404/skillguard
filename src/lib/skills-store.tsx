@@ -48,7 +48,7 @@ function isJiraSkill(title: string): boolean {
 
 export function SkillsProvider({ children }: { children: React.ReactNode }) {
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
-  const [role, setRole] = useState<"employee" | "admin">("employee");
+  const [role, setRole] = useState<"employee" | "admin">("admin");
   const evalTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   // Cleanup timers on unmount
