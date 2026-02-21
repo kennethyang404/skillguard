@@ -11,17 +11,15 @@ export interface EvaluationScores {
   credentials: number | EvaluationCategory;
   compatibility: number | EvaluationCategory;
   quality: number | EvaluationCategory;
-  networkEgress: number | EvaluationCategory;
   summary?: string;
 }
 
-/** The 5 evaluation section keys in rubric order */
+/** The 4 evaluation section keys in rubric order */
 export const EVALUATION_KEYS: (keyof Omit<EvaluationScores, "summary">)[] = [
   "security",
   "credentials",
   "compatibility",
   "quality",
-  "networkEgress",
 ];
 
 /** Human-readable labels for each evaluation section */
@@ -30,7 +28,6 @@ export const EVALUATION_LABELS: Record<string, string> = {
   credentials: "Credential Handling",
   compatibility: "Enterprise Compatibility",
   quality: "Quality & Capability",
-  networkEgress: "Network Egress & Data Disclosure",
 };
 
 /** Extract numeric score from a category that may be number or EvaluationCategory */

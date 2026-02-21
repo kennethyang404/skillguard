@@ -16,7 +16,6 @@ import {
   GitBranch,
   Package,
   KeyRound,
-  Network,
 } from "lucide-react";
 
 const methodologySteps = [
@@ -57,13 +56,6 @@ const methodologySteps = [
   },
   {
     number: "06",
-    title: "Network Egress & Data Disclosure",
-    description:
-      "Enumerates all outbound network actions (curl, wget, cloud CLIs, webhooks), classifies each as download-only vs upload/send, and verifies SKILL.md documents all endpoints, data sent, and justification.",
-    icon: Network,
-  },
-  {
-    number: "07",
     title: "Human Review & Approval",
     description:
       "Admin reviewers receive a detailed evaluation report with per-section severity scores (0–100), explanations, and flagged concerns. They can approve, reject, or request revisions with full context.",
@@ -80,7 +72,7 @@ const principles = [
   {
     icon: Layers,
     title: "Defense in Depth",
-    description: "Five independent evaluation categories ensure no single point of failure. Each produces an independent severity score.",
+    description: "Four independent evaluation categories ensure no single point of failure. Each produces an independent severity score.",
   },
   {
     icon: GitBranch,
@@ -109,8 +101,8 @@ const LandingPage = () => {
           <span className="text-primary">governance & distribution</span>
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          SkillGuard evaluates every agent skill across five security dimensions — from injection vectors and credential handling
-          to network egress analysis — before it reaches your teams.
+          SkillGuard evaluates every agent skill across four security dimensions — from injection vectors and credential handling
+          to enterprise compatibility — before it reaches your teams.
         </p>
         <div className="flex items-center justify-center gap-3 mt-8">
           <Button asChild size="lg">
@@ -131,7 +123,7 @@ const LandingPage = () => {
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Evaluation Methodology</h2>
           <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
-            Every submitted skill passes through a 7-stage pipeline with 5 independent scoring categories,
+            Every submitted skill passes through a 6-stage pipeline with 4 independent scoring categories,
             designed to catch issues that manual review alone would miss.
           </p>
         </div>
@@ -200,11 +192,11 @@ const LandingPage = () => {
               <div>
                 <h3 className="font-semibold mb-1">Severity Scoring (0–100)</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Each of the five evaluation categories produces an independent severity score: <strong>0–10</strong> minimal risk,{" "}
+                 Each of the four evaluation categories produces an independent severity score: <strong>0–10</strong> minimal risk,{" "}
                   <strong>11–25</strong> low risk, <strong>26–45</strong> moderate risk, <strong>46–65</strong> high risk,{" "}
                   <strong>66–85</strong> very high risk, <strong>86–100</strong> critical. Skills must achieve passing scores across{" "}
-                  <strong>all five categories</strong> — Security & Safety, Credential Handling, Enterprise Compatibility,
-                  Quality & Capability, and Network Egress — to be eligible for approval.
+                  <strong>all four categories</strong> — Security & Safety, Credential Handling, Enterprise Compatibility,
+                  and Quality & Capability — to be eligible for approval.
                 </p>
               </div>
             </div>

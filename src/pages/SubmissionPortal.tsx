@@ -72,7 +72,7 @@ const SubmissionPortal = () => {
       category: tCategory,
       markdownContent: generatedMarkdown,
       bashScript: tBashScript || undefined,
-      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0, networkEgress: 0 },
+      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0 },
       submissionMethod: "template",
     });
     toast.success("Skill submitted for review!");
@@ -95,7 +95,7 @@ const SubmissionPortal = () => {
       category: rawCategory,
       markdownContent: rawContent,
       bashScript: rawBashScript || undefined,
-      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0, networkEgress: 0 },
+      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0 },
       submissionMethod: "upload",
     });
     toast.success("Skill submitted for review!");
