@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { getScore, getExplanation } from "@/lib/types";
+import { getScore, getExplanation, EVALUATION_KEYS, EVALUATION_LABELS } from "@/lib/types";
 import { useSkills } from "@/lib/skills-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Skill, SkillStatus } from "@/lib/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Shield, Puzzle, Sparkles, Check, X } from "lucide-react";
+import { Shield, Puzzle, Sparkles, Check, X, KeyRound, Network } from "lucide-react";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
 
 const statusColors: Record<string, string> = {
   approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
   pending: "bg-amber-100 text-amber-800 border-amber-200",
   rejected: "bg-red-100 text-red-800 border-red-200",
+};
+
+const EVAL_ICONS: Record<string, React.ElementType> = {
+  security: Shield,
+  credentials: KeyRound,
+  compatibility: Puzzle,
+  quality: Sparkles,
+  networkEgress: Network,
 };
 
 const AdminDashboard = () => {
@@ -154,8 +162,8 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm">Score Breakdown</CardTitle>
                       {(() => {
-                        const scores = [selectedSkill.evaluationScores.security, selectedSkill.evaluationScores.compatibility, selectedSkill.evaluationScores.quality].map(getScore);
-                        const avg = Math.round(scores.reduce((a, b) => a + b, 0) / 3);
+                        const scores = EVALUATION_KEYS.map((k) => getScore(selectedSkill.evaluationScores[k]));
+                        const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
                         const c = avg >= 90 ? "text-emerald-600" : avg >= 70 ? "text-amber-600" : avg > 0 ? "text-red-600" : "text-muted-foreground";
                         return <span className={`text-sm font-bold ${c}`}>{avg > 0 ? `${avg}/100` : "Pending"}</span>;
                       })()}
@@ -167,19 +175,16 @@ const AdminDashboard = () => {
                         {selectedSkill.evaluationScores.summary}
                       </p>
                     )}
-                    {[
-                      { label: "Security & Safety", val: selectedSkill.evaluationScores.security, icon: Shield },
-                      { label: "Compatibility", val: selectedSkill.evaluationScores.compatibility, icon: Puzzle },
-                      { label: "Quality", val: selectedSkill.evaluationScores.quality, icon: Sparkles },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      const score = getScore(item.val);
-                      const explanation = getExplanation(item.val);
+                    {EVALUATION_KEYS.map((key) => {
+                      const Icon = EVAL_ICONS[key];
+                      const val = selectedSkill.evaluationScores[key];
+                      const score = getScore(val);
+                      const explanation = getExplanation(val);
                       const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : score > 0 ? "text-red-600" : "text-muted-foreground";
                       return (
-                        <div key={item.label} className="space-y-1.5">
+                        <div key={key} className="space-y-1.5">
                           <div className="flex justify-between text-sm">
-                            <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{item.label}</span>
+                            <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{EVALUATION_LABELS[key]}</span>
                             <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
                           </div>
                           <Progress value={score} className="h-2" />
@@ -200,6 +205,17 @@ const AdminDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {selectedSkill.bashScript && (
+                  <Card>
+                    <CardHeader><CardTitle className="text-sm">Bash Script</CardTitle></CardHeader>
+                    <CardContent>
+                      <pre className="bg-muted rounded-lg p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap">
+                        {selectedSkill.bashScript}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Admin Notes</label>

@@ -12,7 +12,7 @@ import { CATEGORIES } from "@/lib/mock-data";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import JSZip from "jszip";
-import { Upload, FileText, Loader2, ChevronDown, Shield, Cpu, Puzzle, Sparkles, CheckCircle2, Scan } from "lucide-react";
+import { Upload, FileText, Loader2, ChevronDown, Shield, Cpu, Puzzle, Sparkles, CheckCircle2, Scan, KeyRound, Network, Terminal } from "lucide-react";
 
 const SubmissionPortal = () => {
   const { addSkill } = useSkills();
@@ -30,7 +30,7 @@ const SubmissionPortal = () => {
   const [tCategory, setTCategory] = useState("");
   const [tTags, setTTags] = useState("");
   const [tDescription, setTDescription] = useState("");
-
+  const [tBashScript, setTBashScript] = useState("");
   // Raw upload state
   const [rawContent, setRawContent] = useState("");
   const [rawName, setRawName] = useState("");
@@ -39,6 +39,7 @@ const SubmissionPortal = () => {
   const [rawDescription, setRawDescription] = useState("");
   const [rawCategory, setRawCategory] = useState("");
   const [rawTags, setRawTags] = useState("");
+  const [rawBashScript, setRawBashScript] = useState("");
   const [clawhubUrl, setClawhubUrl] = useState("");
 
   const generatedMarkdown = useMemo(() => {
@@ -70,13 +71,14 @@ const SubmissionPortal = () => {
       tags: tTags.split(",").map((t) => t.trim()).filter(Boolean),
       category: tCategory,
       markdownContent: generatedMarkdown,
-      evaluationScores: { security: 0, compatibility: 0, quality: 0 },
+      bashScript: tBashScript || undefined,
+      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0, networkEgress: 0 },
       submissionMethod: "template",
     });
     toast.success("Skill submitted for review!");
     setTTitle(""); setTGoal(""); setTWhenToUse(""); setTInput(""); setTOutput("");
     setTProcedure(""); setTVerification(""); setTVersion("1.0.0"); setTAuthor("");
-    setTCategory(""); setTTags(""); setTDescription("");
+    setTCategory(""); setTTags(""); setTDescription(""); setTBashScript("");
   };
 
   const handleRawSubmit = () => {
@@ -92,12 +94,13 @@ const SubmissionPortal = () => {
       tags: rawTags.split(",").map((t) => t.trim()).filter(Boolean),
       category: rawCategory,
       markdownContent: rawContent,
-      evaluationScores: { security: 0, compatibility: 0, quality: 0 },
+      bashScript: rawBashScript || undefined,
+      evaluationScores: { security: 0, credentials: 0, compatibility: 0, quality: 0, networkEgress: 0 },
       submissionMethod: "upload",
     });
     toast.success("Skill submitted for review!");
     setRawContent(""); setRawName(""); setRawVersion("1.0.0"); setRawAuthor("");
-    setRawDescription(""); setRawCategory(""); setRawTags(""); setClawhubUrl("");
+    setRawDescription(""); setRawCategory(""); setRawTags(""); setRawBashScript(""); setClawhubUrl("");
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,8 +108,25 @@ const SubmissionPortal = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setRawContent(ev.target?.result as string);
-      if (!rawName) setRawName(file.name.replace(/\.md$/i, ""));
+      const content = ev.target?.result as string;
+      if (file.name.endsWith(".sh") || file.name.endsWith(".bash")) {
+        setRawBashScript(content);
+        toast.success("Bash script loaded.");
+      } else {
+        setRawContent(content);
+        if (!rawName) setRawName(file.name.replace(/\.md$/i, ""));
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleTemplateBashUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setTBashScript(ev.target?.result as string);
+      toast.success("Bash script loaded.");
     };
     reader.readAsText(file);
   };
@@ -357,35 +377,52 @@ const SubmissionPortal = () => {
                 {[
                   {
                     icon: Shield,
-                    title: "Security & Safety Analysis",
+                    title: "Security & Safety",
                     steps: [
-                      "Injection vector scanning",
-                      "Privilege escalation detection",
-                      "Data exfiltration pattern matching",
-                      "Sandbox escape analysis",
-                      "Dependency vulnerability audit",
+                      "curl|bash / remote code execution detection",
+                      "Prompt injection vulnerability scanning",
+                      "Obfuscated script detection (base64, eval)",
+                      "Unsafe command execution analysis",
+                    ],
+                  },
+                  {
+                    icon: KeyRound,
+                    title: "Credential Handling",
+                    steps: [
+                      "API key exposure in chat/CLI detection",
+                      "Environment variable usage validation",
+                      "Secrets-to-stdout leak detection",
+                      "Credential scope minimization check",
                     ],
                   },
                   {
                     icon: Puzzle,
                     title: "Enterprise Compatibility",
                     steps: [
-                      "Schema conformance validation",
-                      "API surface compatibility check",
-                      "Version constraint resolution",
-                      "Cross-platform runtime testing",
-                      "Integration conflict detection",
+                      "Sudo/root requirement detection",
+                      "System config modification analysis",
+                      "Proxy & cert pinning compatibility",
+                      "Restricted package install validation",
                     ],
                   },
                   {
                     icon: Sparkles,
                     title: "Quality & Capability",
                     steps: [
-                      "Instruction clarity scoring",
-                      "Edge-case coverage analysis",
-                      "Output consistency benchmarking",
-                      "Performance profiling",
-                      "Confidence interval computation",
+                      "Persona & scope definition scoring",
+                      "Constraint clarity evaluation",
+                      "SKILL.md ↔ bash code alignment",
+                      "Auditability & safe defaults check",
+                    ],
+                  },
+                  {
+                    icon: Network,
+                    title: "Network Egress & Data Disclosure",
+                    steps: [
+                      "Outbound network action enumeration",
+                      "Download vs upload classification",
+                      "Documentation alignment verification",
+                      "Undisclosed data transmission flagging",
                     ],
                   },
                 ].map((category) => {
@@ -411,9 +448,9 @@ const SubmissionPortal = () => {
               <div className="mt-4 flex items-start gap-2 rounded-md bg-amber-100/50 dark:bg-amber-900/20 p-3">
                 <Scan className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Each category produces an independent score out of 100. Skills must pass all three evaluations
-                  to be approved. The entire pipeline runs autonomously — admin reviewers see the full report
-                  with detailed explanations and can override decisions when necessary.
+                  Each category produces an independent severity score (0–100). Skills must pass all five evaluations
+                  to be approved. The pipeline analyzes both the SKILL.md and any attached bash scripts for consistency.
+                  Admin reviewers see the full report with per-section explanations.
                 </p>
               </div>
             </CardContent>
@@ -464,6 +501,18 @@ const SubmissionPortal = () => {
               <div className="space-y-2">
                 <Label>Verification</Label>
                 <Textarea value={tVerification} onChange={(e) => setTVerification(e.target.value)} placeholder="How to confirm it worked..." rows={2} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Bash Script (optional)</Label>
+                <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                  <Terminal className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground mb-2">Upload a .sh or .bash file</p>
+                  <input type="file" accept=".sh,.bash" onChange={handleTemplateBashUpload} className="mx-auto block text-sm" />
+                </div>
+                {tBashScript && (
+                  <Textarea value={tBashScript} onChange={(e) => setTBashScript(e.target.value)} rows={4} className="font-mono text-xs" placeholder="Bash script content..." />
+                )}
               </div>
 
               <hr className="my-2" />
@@ -523,11 +572,11 @@ const SubmissionPortal = () => {
           <div className="grid lg:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Upload SKILL.md</Label>
+                <Label>Upload SKILL.md or Bash Script</Label>
                 <div className="border-2 border-dashed rounded-lg p-6 text-center">
                   <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">Drag & drop or click to upload</p>
-                  <input type="file" accept=".md,.txt" onChange={handleFileUpload} className="mx-auto block text-sm" />
+                  <p className="text-sm text-muted-foreground mb-2">Drag & drop or click to upload (.md, .txt, .sh, .bash)</p>
+                  <input type="file" accept=".md,.txt,.sh,.bash" onChange={handleFileUpload} className="mx-auto block text-sm" />
                 </div>
               </div>
 
@@ -546,6 +595,13 @@ const SubmissionPortal = () => {
                 <div className="space-y-2">
                   <Label>Markdown Content</Label>
                   <Textarea value={rawContent} onChange={(e) => setRawContent(e.target.value)} rows={8} className="font-mono text-xs" />
+                </div>
+              )}
+
+              {rawBashScript && (
+                <div className="space-y-2">
+                  <Label>Bash Script Content</Label>
+                  <Textarea value={rawBashScript} onChange={(e) => setRawBashScript(e.target.value)} rows={6} className="font-mono text-xs" />
                 </div>
               )}
 

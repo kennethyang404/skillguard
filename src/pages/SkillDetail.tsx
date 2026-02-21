@@ -1,12 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useSkills } from "@/lib/skills-store";
-import { getScore, getExplanation } from "@/lib/types";
+import { getScore, getExplanation, EVALUATION_KEYS, EVALUATION_LABELS } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText } from "lucide-react";
+import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText, KeyRound, Network } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
@@ -15,6 +15,14 @@ const statusColors: Record<string, string> = {
   approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
   pending: "bg-amber-100 text-amber-800 border-amber-200",
   rejected: "bg-red-100 text-red-800 border-red-200",
+};
+
+const EVAL_ICONS: Record<string, React.ElementType> = {
+  security: Shield,
+  credentials: KeyRound,
+  compatibility: Puzzle,
+  quality: Sparkles,
+  networkEgress: Network,
 };
 
 const SkillDetail = () => {
@@ -45,11 +53,12 @@ const SkillDetail = () => {
     toast.success(`"${skill.title}" downloaded successfully.`);
   };
 
-  const evalItems = [
-    { label: "Security & Safety", val: skill.evaluationScores.security, icon: Shield },
-    { label: "Enterprise Compatibility", val: skill.evaluationScores.compatibility, icon: Puzzle },
-    { label: "Quality & Capability", val: skill.evaluationScores.quality, icon: Sparkles },
-  ];
+  const evalItems = EVALUATION_KEYS.map((key) => ({
+    key,
+    label: EVALUATION_LABELS[key],
+    val: skill.evaluationScores[key],
+    icon: EVAL_ICONS[key],
+  }));
 
   const overallScore = Math.round(
     evalItems.reduce((sum, item) => sum + getScore(item.val), 0) / evalItems.length
@@ -83,7 +92,7 @@ const SkillDetail = () => {
             </div>
           </div>
 
-          {/* Score Breakdown — immediately visible */}
+          {/* Score Breakdown */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -106,7 +115,7 @@ const SkillDetail = () => {
                 const explanation = getExplanation(item.val);
                 const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : "text-red-600";
                 return (
-                  <div key={item.label} className="space-y-2">
+                  <div key={item.key} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-1.5">
                         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -136,11 +145,23 @@ const SkillDetail = () => {
               </div>
             </CardContent>
           </Card>
+
+          {skill.bashScript && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Bash Script</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="bg-muted rounded-lg p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap">
+                  {skill.bashScript}
+                </pre>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
         <div className="space-y-4">
-          {/* Spacer to align with score breakdown */}
           <div className="hidden lg:block h-[4.5rem]" />
           <Card>
             <CardContent className="pt-6 space-y-4">
@@ -160,7 +181,6 @@ const SkillDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Evaluation Pipeline */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">

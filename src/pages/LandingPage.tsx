@@ -15,6 +15,8 @@ import {
   Layers,
   GitBranch,
   Package,
+  KeyRound,
+  Network,
 } from "lucide-react";
 
 const methodologySteps = [
@@ -22,35 +24,49 @@ const methodologySteps = [
     number: "01",
     title: "Submission & Parsing",
     description:
-      "Skills are submitted as structured SKILL.md files. Our parser validates the markdown AST, extracts metadata, and normalizes the content for downstream analysis.",
+      "Skills are submitted as SKILL.md files with optional bash scripts. Our parser validates the markdown AST, extracts metadata, and normalizes all content for downstream analysis.",
     icon: Package,
   },
   {
     number: "02",
     title: "Security & Safety Scan",
     description:
-      "An AI-driven security engine scans for injection vectors, privilege escalation patterns, data exfiltration risks, and sandbox escape attempts across the entire skill definition.",
+      "Scans for curl|bash patterns, prompt injection vulnerabilities, obfuscated scripts (base64, eval), unsafe command execution, and remote code download patterns across the entire skill definition.",
     icon: Shield,
   },
   {
     number: "03",
-    title: "Enterprise Compatibility Check",
+    title: "Credential Handling Review",
     description:
-      "Each skill is tested against enterprise schema standards, API surface contracts, version constraints, and cross-platform runtime environments to ensure seamless integration.",
-    icon: Puzzle,
+      "Checks whether the skill asks users to paste API keys into chat or CLI history, verifies proper use of environment variables and secret managers, and detects credentials printed to stdout or sent over the network.",
+    icon: KeyRound,
   },
   {
     number: "04",
-    title: "Quality & Capability Assessment",
+    title: "Enterprise Compatibility Check",
     description:
-      "Instruction clarity, edge-case coverage, output consistency, and performance are benchmarked. A confidence score is computed from multiple evaluation dimensions.",
-    icon: Sparkles,
+      "Verifies the skill doesn't require sudo/root, modify system configs, install daemons, or assume consumer services. Ensures it runs in locked-down corporate environments with proxy and cert pinning constraints.",
+    icon: Puzzle,
   },
   {
     number: "05",
+    title: "Quality & Capability Assessment",
+    description:
+      "Evaluates persona scope definition, constraint clarity, instruction-to-code alignment, and whether the skill follows corporate best practices like auditable steps and safe defaults.",
+    icon: Sparkles,
+  },
+  {
+    number: "06",
+    title: "Network Egress & Data Disclosure",
+    description:
+      "Enumerates all outbound network actions (curl, wget, cloud CLIs, webhooks), classifies each as download-only vs upload/send, and verifies SKILL.md documents all endpoints, data sent, and justification.",
+    icon: Network,
+  },
+  {
+    number: "07",
     title: "Human Review & Approval",
     description:
-      "Admin reviewers receive a detailed evaluation report with scores, explanations, and flagged concerns. They can approve, reject, or request revisions with full context.",
+      "Admin reviewers receive a detailed evaluation report with per-section severity scores (0–100), explanations, and flagged concerns. They can approve, reject, or request revisions with full context.",
     icon: Eye,
   },
 ];
@@ -59,22 +75,22 @@ const principles = [
   {
     icon: Lock,
     title: "Zero Trust by Default",
-    description: "Every skill is treated as potentially hostile until proven safe through automated analysis.",
+    description: "Every skill is treated as potentially hostile until proven safe through automated analysis. We do not assume benign intent.",
   },
   {
     icon: Layers,
     title: "Defense in Depth",
-    description: "Multiple independent evaluation layers ensure no single point of failure in the review process.",
+    description: "Five independent evaluation categories ensure no single point of failure. Each produces an independent severity score.",
   },
   {
     icon: GitBranch,
-    title: "Continuous Evaluation",
-    description: "Skills are re-evaluated when standards evolve, ensuring ongoing compliance with enterprise policies.",
+    title: "Evidence-Driven Review",
+    description: "Every score comes with concrete evidence from the provided inputs — no black-box decisions. Reviewers see exactly why.",
   },
   {
     icon: Scan,
-    title: "Full Transparency",
-    description: "Every score comes with a detailed explanation. No black-box decisions — reviewers see exactly why.",
+    title: "Conservative by Design",
+    description: "Silent uploads, webhook posts, and undocumented telemetry are treated as potential data exfiltration unless explicitly justified.",
   },
 ];
 
@@ -93,9 +109,8 @@ const LandingPage = () => {
           <span className="text-primary">governance & distribution</span>
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          SkillGuard provides a rigorous, multi-stage automated evaluation pipeline that ensures
-          every agent skill meets your organization's security, compatibility, and quality standards
-          before it reaches your teams.
+          SkillGuard evaluates every agent skill across five security dimensions — from injection vectors and credential handling
+          to network egress analysis — before it reaches your teams.
         </p>
         <div className="flex items-center justify-center gap-3 mt-8">
           <Button asChild size="lg">
@@ -116,20 +131,18 @@ const LandingPage = () => {
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Evaluation Methodology</h2>
           <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
-            Every submitted skill passes through a 5-stage pipeline designed to catch issues
-            that manual review alone would miss.
+            Every submitted skill passes through a 7-stage pipeline with 5 independent scoring categories,
+            designed to catch issues that manual review alone would miss.
           </p>
         </div>
 
         <div className="relative space-y-0">
-          {/* Vertical line connector */}
           <div className="absolute left-[27px] top-8 bottom-8 w-px bg-border hidden md:block" />
 
-          {methodologySteps.map((step, i) => {
+          {methodologySteps.map((step) => {
             const Icon = step.icon;
             return (
               <div key={step.number} className="relative flex gap-5 py-5">
-                {/* Step number node */}
                 <div className="relative z-10 flex-shrink-0 h-14 w-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
@@ -185,12 +198,13 @@ const LandingPage = () => {
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1">Scoring & Approval</h3>
+                <h3 className="font-semibold mb-1">Severity Scoring (0–100)</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Each evaluation category produces an independent score out of 100. Skills must achieve
-                  passing scores across <strong>all three categories</strong> — Security, Compatibility, and Quality —
-                  to be eligible for approval. The full evaluation report, including per-category explanations
-                  and flagged concerns, is surfaced to admin reviewers for final decision-making.
+                  Each of the five evaluation categories produces an independent severity score: <strong>0–10</strong> minimal risk,{" "}
+                  <strong>11–25</strong> low risk, <strong>26–45</strong> moderate risk, <strong>46–65</strong> high risk,{" "}
+                  <strong>66–85</strong> very high risk, <strong>86–100</strong> critical. Skills must achieve passing scores across{" "}
+                  <strong>all five categories</strong> — Security & Safety, Credential Handling, Enterprise Compatibility,
+                  Quality & Capability, and Network Egress — to be eligible for approval.
                 </p>
               </div>
             </div>
