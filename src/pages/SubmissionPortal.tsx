@@ -124,7 +124,7 @@ const SubmissionPortal = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="template">
+      <Tabs defaultValue="upload">
         <TabsList className="mb-6">
           <TabsTrigger value="template" className="gap-1.5">
             <FileText className="h-4 w-4" /> Template Form
