@@ -106,7 +106,7 @@ Message context lines include \`slack message id\` and \`channel\` fields you ca
 
 - React with ✅ to mark completed tasks.
 - Pin key decisions or weekly status updates.`,
-    status: "approved",
+    status: "rejected",
     evaluationScores: {
       security: {
         score: 82,
@@ -285,7 +285,7 @@ Use \`gog\` for Gmail/Calendar/Drive/Contacts/Sheets/Docs. Requires OAuth setup.
 - Set \`GOG_ACCOUNT=you@gmail.com\` to avoid repeating \`--account\`.
 - For scripting, prefer \`--json\` plus \`--no-input\`.
 - Confirm before sending mail or creating events.`,
-    status: "pending",
+    status: "rejected",
     evaluationScores: {
       security: {
         score: 72,
@@ -454,7 +454,7 @@ Optional services:
 
 - \`FIRECRAWL_API_KEY\` for blocked sites
 - \`APIFY_API_TOKEN\` for YouTube fallback`,
-    status: "approved",
+    status: "rejected",
     evaluationScores: {
       security: {
         score: 80,
