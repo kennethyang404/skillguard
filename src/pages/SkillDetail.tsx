@@ -1,10 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useSkills } from "@/lib/skills-store";
+import { getScore, getExplanation } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
@@ -34,10 +36,15 @@ const SkillDetail = () => {
   };
 
   const evalItems = [
-    { label: "Security & Safety", score: skill.evaluationScores.security, icon: Shield },
-    { label: "Enterprise Compatibility", score: skill.evaluationScores.compatibility, icon: Puzzle },
-    { label: "Quality & Capability", score: skill.evaluationScores.quality, icon: Sparkles },
+    { label: "Security & Safety", val: skill.evaluationScores.security, icon: Shield },
+    { label: "Enterprise Compatibility", val: skill.evaluationScores.compatibility, icon: Puzzle },
+    { label: "Quality & Capability", val: skill.evaluationScores.quality, icon: Sparkles },
   ];
+
+  const overallScore = Math.round(
+    evalItems.reduce((sum, item) => sum + getScore(item.val), 0) / evalItems.length
+  );
+  const overallColor = overallScore >= 90 ? "text-emerald-600" : overallScore >= 70 ? "text-amber-600" : "text-red-600";
 
   return (
     <div>
@@ -98,22 +105,45 @@ const SkillDetail = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Evaluation Report</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="h-4 w-4" /> Evaluation Report
+                </CardTitle>
+                <span className={`text-lg font-bold ${overallColor}`}>{overallScore}/100</span>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
+              {/* Summary */}
+              {skill.evaluationScores.summary && (
+                <>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {skill.evaluationScores.summary}
+                  </p>
+                  <Separator />
+                </>
+              )}
+
+              {/* Per-category breakdown */}
               {evalItems.map((item) => {
                 const Icon = item.icon;
-                const color = item.score >= 90 ? "text-emerald-600" : item.score >= 70 ? "text-amber-600" : "text-red-600";
+                const score = getScore(item.val);
+                const explanation = getExplanation(item.val);
+                const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : "text-red-600";
                 return (
-                  <div key={item.label} className="space-y-1.5">
+                  <div key={item.label} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-1.5">
                         <Icon className="h-4 w-4 text-muted-foreground" />
                         {item.label}
                       </span>
-                      <span className={`font-semibold ${color}`}>{item.score}/100</span>
+                      <span className={`font-semibold ${color}`}>{score}/100</span>
                     </div>
-                    <Progress value={item.score} className="h-2" />
+                    <Progress value={score} className="h-2" />
+                    {explanation && (
+                      <p className="text-xs text-muted-foreground leading-relaxed pl-5">
+                        {explanation}
+                      </p>
+                    )}
                   </div>
                 );
               })}

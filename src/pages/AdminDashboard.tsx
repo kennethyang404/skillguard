@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { getScore } from "@/lib/types";
 import { useSkills } from "@/lib/skills-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -140,19 +141,20 @@ const AdminDashboard = () => {
                   <CardHeader><CardTitle className="text-sm">Evaluation Report</CardTitle></CardHeader>
                   <CardContent className="space-y-3">
                     {[
-                      { label: "Security & Safety", score: selectedSkill.evaluationScores.security, icon: Shield },
-                      { label: "Compatibility", score: selectedSkill.evaluationScores.compatibility, icon: Puzzle },
-                      { label: "Quality", score: selectedSkill.evaluationScores.quality, icon: Sparkles },
+                      { label: "Security & Safety", val: selectedSkill.evaluationScores.security, icon: Shield },
+                      { label: "Compatibility", val: selectedSkill.evaluationScores.compatibility, icon: Puzzle },
+                      { label: "Quality", val: selectedSkill.evaluationScores.quality, icon: Sparkles },
                     ].map((item) => {
                       const Icon = item.icon;
-                      const color = item.score >= 90 ? "text-emerald-600" : item.score >= 70 ? "text-amber-600" : item.score > 0 ? "text-red-600" : "text-muted-foreground";
+                      const score = getScore(item.val);
+                      const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : score > 0 ? "text-red-600" : "text-muted-foreground";
                       return (
                         <div key={item.label} className="space-y-1">
                           <div className="flex justify-between text-sm">
                             <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{item.label}</span>
-                            <span className={`font-semibold ${color}`}>{item.score > 0 ? `${item.score}/100` : "Pending"}</span>
+                            <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
                           </div>
-                          <Progress value={item.score} className="h-2" />
+                          <Progress value={score} className="h-2" />
                         </div>
                       );
                     })}
