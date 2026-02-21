@@ -116,15 +116,92 @@ const SubmissionPortal = () => {
     setIsImporting(true);
 
     try {
-      // Convert GitHub URLs to raw content URLs
       let fetchUrl = clawhubUrl.trim();
+
+      // Detect ClawHub URL pattern: clawhub.ai/{user}/{skill}
+      const clawhubMatch = fetchUrl.match(
+        /^https?:\/\/clawhub\.ai\/([^/]+)\/([^/]+)\/?$/
+      );
+
+      if (clawhubMatch) {
+        // Use allorigins API to bypass CORS and fetch the ClawHub page
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(fetchUrl)}`;
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error(`Failed to fetch (${response.status})`);
+        const html = await response.text();
+
+        // Parse the HTML to extract the SKILL.md content
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        // Look for the SKILL.md content section — ClawHub renders it in a section after "SKILL.md" heading
+        let skillContent = "";
+
+        // Strategy 1: Find a <pre> or <code> block with the skill content
+        const codeBlocks = doc.querySelectorAll("pre code, .skill-md-content, .markdown-body");
+        if (codeBlocks.length > 0) {
+          skillContent = codeBlocks[0].textContent || "";
+        }
+
+        // Strategy 2: Extract from the full page text by finding the SKILL.md section
+        if (!skillContent) {
+          const fullText = doc.body?.textContent || "";
+          const skillMdIndex = fullText.indexOf("SKILL.md");
+          if (skillMdIndex !== -1) {
+            // Find the actual markdown content that starts with "# " after the SKILL.md label
+            const afterSkillMd = fullText.substring(skillMdIndex + 8);
+            const hashIndex = afterSkillMd.indexOf("# ");
+            if (hashIndex !== -1) {
+              // Extract until we hit "Files" or "Comments" section markers
+              let content = afterSkillMd.substring(hashIndex);
+              const endMarkers = ["\nFiles\n", "\nComments\n", "\nSign in to comment"];
+              for (const marker of endMarkers) {
+                const idx = content.indexOf(marker);
+                if (idx !== -1) content = content.substring(0, idx);
+              }
+              skillContent = content.trim();
+            }
+          }
+        }
+
+        // Strategy 3: Try fetching the raw file from the download zip API
+        if (!skillContent) {
+          throw new Error("Could not extract SKILL.md content from the page.");
+        }
+
+        // Clean up: normalize whitespace and fix line breaks
+        skillContent = skillContent
+          .replace(/\r\n/g, "\n")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+
+        setRawContent(skillContent);
+
+        // Extract metadata from the page
+        const titleEl = doc.querySelector("h1");
+        const descEl = doc.querySelector(".section-subtitle, .skill-hero p");
+        if (titleEl && !rawName) setRawName(titleEl.textContent?.trim() || "");
+        if (descEl && !rawDescription) setRawDescription(descEl.textContent?.trim() || "");
+
+        // Extract author
+        const authorEl = doc.querySelector(".user-name");
+        if (authorEl && !rawAuthor) setRawAuthor(authorEl.textContent?.trim() || "");
+
+        // Extract version
+        const versionMatch = html.match(/version\s*\*?\*?v?([\d.]+)/i);
+        if (versionMatch) setRawVersion(versionMatch[1]);
+
+        toast.success("Skill imported from ClawHub!");
+        return;
+      }
+
+      // GitHub URL handling
       const ghMatch = fetchUrl.match(
         /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/
       );
       if (ghMatch) {
         fetchUrl = `https://raw.githubusercontent.com/${ghMatch[1]}/${ghMatch[2]}/${ghMatch[3]}`;
       }
-      // Also handle gist URLs
       const gistMatch = fetchUrl.match(
         /^https?:\/\/gist\.github\.com\/([^/]+)\/([a-f0-9]+)\/?$/
       );
@@ -132,15 +209,21 @@ const SubmissionPortal = () => {
         fetchUrl = `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
       }
 
+      // For non-ClawHub URLs, try direct fetch (works for raw URLs and GitHub raw)
       const response = await fetch(fetchUrl);
       if (!response.ok) {
-        throw new Error(`Failed to fetch (${response.status})`);
+        // Fallback: try via CORS proxy
+        const proxyResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(fetchUrl)}`);
+        if (!proxyResponse.ok) throw new Error(`Failed to fetch (${proxyResponse.status})`);
+        const text = await proxyResponse.text();
+        setRawContent(text);
+      } else {
+        const text = await response.text();
+        setRawContent(text);
       }
-      const text = await response.text();
-      setRawContent(text);
 
       // Try to extract title from markdown heading
-      const titleMatch = text.match(/^#\s+(.+)$/m);
+      const titleMatch = rawContent.match(/^#\s+(.+)$/m);
       if (titleMatch && !rawName) {
         setRawName(titleMatch[1].trim());
       }
@@ -149,7 +232,7 @@ const SubmissionPortal = () => {
     } catch (error) {
       console.error("Import error:", error);
       toast.error(
-        "Failed to import. Make sure the URL points to a publicly accessible raw markdown file or a GitHub file URL."
+        "Failed to import. Check the URL and try again. Supported: ClawHub URLs, GitHub file URLs, or raw markdown URLs."
       );
     } finally {
       setIsImporting(false);
