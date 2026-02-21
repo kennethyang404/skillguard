@@ -183,26 +183,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Scoring summary */}
-      <section className="max-w-3xl mx-auto">
-        <Card className="border-primary/20 bg-primary/[0.03]">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Severity Scoring (0–100)</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                 Each of the four evaluation categories produces an independent severity score: <strong>0–10</strong> minimal risk,{" "}
-                  <strong>11–25</strong> low risk, <strong>26–45</strong> moderate risk, <strong>46–65</strong> high risk,{" "}
-                  <strong>66–85</strong> very high risk, <strong>86–100</strong> critical. Skills must achieve passing scores across{" "}
-                  <strong>all four categories</strong> — Security & Safety, Credential Handling, Enterprise Compatibility,
-                  and Quality & Capability — to be eligible for approval.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
 
       {/* CTA */}
       <section className="text-center">
