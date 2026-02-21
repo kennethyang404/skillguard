@@ -24,6 +24,7 @@ export function Header() {
           <Link to="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
             <Shield className="h-5 w-5 text-primary" />
             <span>SkillGuard</span>
+            <span className="rounded-md bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 leading-none">Enterprise</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
