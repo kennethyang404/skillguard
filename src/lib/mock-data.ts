@@ -1,399 +1,580 @@
 import { Skill } from "./types";
 
 export const CATEGORIES = [
-  "Code Generation",
-  "Data Analysis",
-  "Documentation",
-  "Testing",
-  "DevOps",
-  "Security",
   "Communication",
+  "Productivity",
+  "DevOps",
+  "Data & Knowledge",
+  "Security",
+  "Documentation",
+  "Media",
 ];
 
 export const initialSkills: Skill[] = [
   {
     id: "1",
-    title: "Code Review Assistant",
-    author: "Sarah Chen",
-    version: "1.2.0",
-    description: "Automatically reviews pull requests for code quality, security issues, and best practices compliance.",
-    tags: ["code-review", "quality", "automation"],
-    category: "Code Generation",
-    markdownContent: `# Code Review Assistant
+    title: "Slack",
+    author: "steipete",
+    version: "1.0.0",
+    description:
+      "Use when you need to control Slack from Clawdbot via the slack tool, including reacting to messages or pinning/unpinning items in Slack channels or DMs.",
+    tags: ["slack", "messaging", "automation"],
+    category: "Communication",
+    markdownContent: `# Slack Actions
 
-## Goal
-Automatically review pull requests for code quality, security vulnerabilities, and adherence to team coding standards.
+## Overview
 
-## When to Use
-- When a new pull request is opened
-- When existing PR code is updated
-- During scheduled code audits
+Use \`slack\` to react, manage pins, send/edit/delete messages, and fetch member info. The tool uses the bot token configured for Clawdbot.
 
-## Input / Output
-**Input:** Pull request diff, repository coding standards document
-**Output:** Structured review with inline comments, severity ratings, and suggested fixes
+## Inputs to collect
 
-## Procedure
-1. Parse the pull request diff to identify changed files
-2. Analyze each change against the coding standards
-3. Check for common security vulnerabilities (SQL injection, XSS, etc.)
-4. Evaluate code complexity and suggest simplifications
-5. Generate inline comments with severity levels (info, warning, error)
-6. Produce a summary report with overall quality score
+- \`channelId\` and \`messageId\` (Slack message timestamp, e.g. \`1712023032.1234\`).
+- For reactions, an \`emoji\` (Unicode or \`:name:\`).
+- For message sends, a \`to\` target (\`channel:<id>\` or \`user:<id>\`) and \`content\`.
 
-## Verification
-- All flagged issues should reference specific lines in the diff
-- Security checks should cover OWASP Top 10
-- False positive rate should be below 5%`,
-    status: "approved",
+## Actions
+
+### React to a message
+\`\`\`json
+{ "action": "react", "channelId": "C123", "messageId": "1712023032.1234", "emoji": "✅" }
+\`\`\`
+
+### Send a message
+\`\`\`json
+{ "action": "sendMessage", "to": "channel:C123", "content": "Hello from Clawdbot" }
+\`\`\`
+
+### Edit / Delete / Read / Pin / Unpin / List Pins / Member Info / Emoji List
+See full SKILL.md for all action schemas.
+
+## Ideas to try
+- React with ✅ to mark completed tasks.
+- Pin key decisions or weekly status updates.`,
+    status: "pending",
     evaluationScores: {
-      security: { score: 92, explanation: "No injection vectors or unsafe execution patterns detected. Properly scopes access to PR diffs only. No curl|bash or remote code execution." },
-      credentials: { score: 95, explanation: "No credential handling in the skill itself. Does not ask users to paste API keys. Relies on platform-managed Git authentication." },
-      compatibility: { score: 88, explanation: "Works with major Git platforms (GitHub, GitLab, Bitbucket). Some edge cases with monorepo setups may require additional configuration. No sudo or privileged access required." },
-      quality: { score: 95, explanation: "Comprehensive procedure with clear verification criteria. Covers OWASP Top 10 and maintains a low false-positive target. Well-structured output format." },
-      networkEgress: { score: 90, explanation: "Read-only access to Git platform APIs. No outbound data uploads detected. All network actions are download-only against documented endpoints." },
-      summary: "A high-quality, production-ready skill with excellent security awareness and thorough verification steps. Minor improvements possible in enterprise monorepo compatibility.",
+      purposeCapability: {
+        score: 30,
+        explanation:
+          "Name/description and the SKILL.md actions (react, send/edit/delete messages, pins, member info, emoji list) are consistent with a Slack control skill. However, the instructions explicitly reference using a 'slack' tool and 'the bot token configured for Clawdbot' while the registry metadata lists no required binaries or environment variables — the skill expects access that it does not declare.",
+      },
+      instructionScope: {
+        score: 15,
+        explanation:
+          "SKILL.md limits behavior to Slack operations and does not ask to read local files or unrelated env vars. That scope is appropriate, but it relies on an externally configured bot token and a 'slack' tool present in the agent environment; those implicit dependencies widen the runtime surface without being documented.",
+      },
+      installMechanism: {
+        score: 5,
+        explanation:
+          "Instruction-only skill with no install spec or code files — lowest install risk. Nothing is written to disk by the skill itself based on provided metadata.",
+      },
+      credentials: {
+        score: 55,
+        explanation:
+          "The skill will need a Slack bot token and a usable Slack CLI/tool to operate, but requires.env and primary credential are empty. Not declaring the token or tool is a proportionality problem: users can't see what secrets will be used or by whom.",
+      },
+      persistencePrivilege: {
+        score: 8,
+        explanation:
+          "always is false and the skill does not request persistent system-wide changes. The agent can invoke the skill autonomously (default), which is expected for an integration that controls Slack.",
+      },
+      summary:
+        "This skill appears to do what it says (control Slack), but it fails to declare two important runtime dependencies: the 'slack' CLI/tool and the Slack bot token it will use. Verify where the bot token comes from and who controls it before installing.",
     },
-    downloads: 1247,
-    rating: 4.7,
-    submissionMethod: "template",
-    submittedAt: "2026-01-15T10:30:00Z",
+    downloads: 198,
+    rating: 4.5,
+    submissionMethod: "upload",
+    submittedAt: "2026-02-10T10:30:00Z",
   },
   {
     id: "2",
-    title: "API Documentation Generator",
-    author: "Marcus Johnson",
-    version: "2.0.1",
-    description: "Generates comprehensive API documentation from code annotations and OpenAPI specs.",
-    tags: ["documentation", "api", "openapi"],
-    category: "Documentation",
-    markdownContent: `# API Documentation Generator
+    title: "YouTube",
+    author: "byungkyu",
+    version: "1.0.3",
+    description:
+      "YouTube Data API integration with managed OAuth. Search videos, manage playlists, access channel data, and interact with comments.",
+    tags: ["youtube", "api", "video", "oauth"],
+    category: "Media",
+    markdownContent: `# YouTube
 
-## Goal
-Generate comprehensive, developer-friendly API documentation from source code annotations and OpenAPI specifications.
+Access the YouTube Data API v3 with managed OAuth authentication. Search videos, manage playlists, access channel information, and interact with comments and subscriptions.
 
-## When to Use
-- After API endpoints are created or modified
-- During release preparation
-- When onboarding new team members to an API
+## Quick Start
 
-## Input / Output
-**Input:** Source code with annotations, OpenAPI/Swagger spec files
-**Output:** Rendered HTML documentation with interactive examples, markdown files
+\`\`\`bash
+# Search for videos
+python <<'EOF'
+import urllib.request, os, json
+req = urllib.request.Request('https://gateway.maton.ai/youtube/youtube/v3/search?part=snippet&q=coding+tutorial&type=video&maxResults=10')
+req.add_header('Authorization', f'Bearer {os.environ["MATON_API_KEY"]}')
+print(json.dumps(json.load(urllib.request.urlopen(req)), indent=2))
+EOF
+\`\`\`
 
-## Procedure
-1. Scan source files for API route annotations
-2. Parse OpenAPI specification if available
-3. Merge code annotations with spec data
-4. Generate request/response examples for each endpoint
-5. Create navigation structure grouped by resource
-6. Output documentation in requested format (HTML, Markdown)
+## Base URL
+\`https://gateway.maton.ai/youtube/{native-api-path}\`
 
-## Verification
-- Every documented endpoint must have at least one example
-- Response schemas must match actual API responses
-- Links and cross-references must resolve correctly`,
+## Authentication
+All requests require: \`Authorization: Bearer $MATON_API_KEY\`
+
+## Connection Management
+Manage your Google OAuth connections at \`https://ctrl.maton.ai\`.`,
     status: "approved",
     evaluationScores: {
-      security: { score: 85, explanation: "Handles source code parsing safely. No execution of user code. Potential risk if OpenAPI specs contain malicious payloads—recommend input sanitization." },
-      credentials: { score: 90, explanation: "Does not request or handle credentials directly. No secrets printed to stdout or written to disk." },
-      compatibility: { score: 94, explanation: "Supports OpenAPI 3.x, Swagger 2.0, and common annotation formats. No privileged access required. Works in standard dev environments." },
-      quality: { score: 91, explanation: "Strong output quality with interactive examples. Schema validation ensures accuracy. Could improve by adding versioned documentation support." },
-      networkEgress: { score: 88, explanation: "Downloads spec files from local or configured endpoints. No data upload behavior detected. Documentation output stays local." },
-      summary: "Reliable documentation generator with broad framework support. Security posture is solid with minor input validation recommendations.",
+      purposeCapability: {
+        score: 10,
+        explanation:
+          "Name and description describe a YouTube Data API integration and the skill only requires MATON_API_KEY and network access to Maton endpoints (gateway.maton.ai, ctrl.maton.ai). Those requirements are proportionate to a managed-OAuth proxy for YouTube.",
+      },
+      instructionScope: {
+        score: 12,
+        explanation:
+          "SKILL.md instructs the agent to call Maton gateway and control endpoints and to open Maton-provided OAuth URLs. It does not instruct reading unrelated files or environment variables. All network calls are to the Maton service.",
+      },
+      installMechanism: {
+        score: 5,
+        explanation:
+          "No install spec or code files (instruction-only). This minimizes on-disk risk; nothing is downloaded or written by an installer.",
+      },
+      credentials: {
+        score: 10,
+        explanation:
+          "Only a single environment variable (MATON_API_KEY) is required. That is consistent: Maton handles OAuth and the API key is the expected bearer credential for Maton's gateway.",
+      },
+      persistencePrivilege: {
+        score: 5,
+        explanation:
+          "always is false and the skill requests no special persistent agent privileges or filesystem/config modifications. Model-invocation is allowed (default), which is normal for an invocable skill.",
+      },
+      summary:
+        "This skill appears internally consistent for using a Maton-managed YouTube proxy. Verify you trust Maton (maton.ai) and the skill publisher. Review Maton's privacy/security policy and how it stores OAuth tokens.",
     },
-    downloads: 892,
-    rating: 4.5,
+    downloads: 13,
+    rating: 4.2,
     submissionMethod: "upload",
     submittedAt: "2026-01-20T14:15:00Z",
   },
   {
     id: "3",
-    title: "Test Suite Generator",
-    author: "Aisha Patel",
+    title: "Gog",
+    author: "steipete",
     version: "1.0.0",
-    description: "Generates unit and integration tests from function signatures and docstrings.",
-    tags: ["testing", "unit-tests", "automation"],
-    category: "Testing",
-    markdownContent: `# Test Suite Generator
+    description:
+      "Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs.",
+    tags: ["google", "gmail", "calendar", "drive", "sheets"],
+    category: "Productivity",
+    markdownContent: `# gog
 
-## Goal
-Automatically generate comprehensive unit and integration tests from function signatures, docstrings, and usage patterns.
+Use \`gog\` for Gmail/Calendar/Drive/Contacts/Sheets/Docs. Requires OAuth setup.
 
-## When to Use
-- When new functions or modules are created
-- When test coverage falls below threshold
-- During refactoring to ensure behavior preservation
+## Setup (once)
+- \`gog auth credentials /path/to/client_secret.json\`
+- \`gog auth add you@gmail.com --services gmail,calendar,drive,contacts,sheets,docs\`
+- \`gog auth list\`
 
-## Input / Output
-**Input:** Source code files, coverage reports, existing test patterns
-**Output:** Test files with unit and integration tests, coverage improvement report
+## Common commands
+- Gmail search: \`gog gmail search 'newer_than:7d' --max 10\`
+- Gmail send: \`gog gmail send --to a@b.com --subject "Hi" --body "Hello"\`
+- Calendar: \`gog calendar events <calendarId> --from <iso> --to <iso>\`
+- Drive search: \`gog drive search "query" --max 10\`
+- Contacts: \`gog contacts list --max 20\`
+- Sheets get: \`gog sheets get <sheetId> "Tab!A1:D10" --json\`
+- Docs export: \`gog docs export <docId> --format txt --out /tmp/doc.txt\`
 
-## Procedure
-1. Analyze function signatures and type annotations
-2. Extract expected behavior from docstrings
-3. Identify edge cases from parameter types
-4. Generate test cases covering happy path and edge cases
-5. Create mock objects for external dependencies
-6. Write assertions based on documented return types
-
-## Verification
-- Generated tests must compile and run without errors
-- Coverage improvement must be measurable
-- No duplicate tests should be generated`,
-    status: "approved",
+## Notes
+- Set \`GOG_ACCOUNT=you@gmail.com\` to avoid repeating \`--account\`.
+- Confirm before sending mail or creating events.`,
+    status: "pending",
     evaluationScores: {
-      security: { score: 78, explanation: "Test generation is sandboxed but mock object creation could inadvertently expose internal APIs. Recommend restricting mock scope to declared interfaces." },
-      credentials: { score: 92, explanation: "No credential handling required. Mock objects do not reference real secrets or environment variables." },
-      compatibility: { score: 92, explanation: "Supports Jest, Vitest, Mocha, and pytest. TypeScript and Python type annotations are well-utilized for test inference." },
-      quality: { score: 87, explanation: "Good coverage of happy-path and edge cases. Could improve by detecting integration boundaries and generating contract tests." },
-      networkEgress: { score: 95, explanation: "Purely local operation. No network calls detected in the skill definition or expected bash behavior." },
-      summary: "Solid test generation skill with good multi-framework support. Security could be tightened around mock object scoping.",
+      purposeCapability: {
+        score: 28,
+        explanation:
+          "The SKILL.md describes a Google Workspace CLI and its commands — purpose aligns with actions shown. However the registry metadata lists no required binaries or install spec, while the SKILL.md includes metadata that requires the 'gog' binary and even provides a Homebrew formula. This mismatch is an inconsistency worth verifying.",
+      },
+      instructionScope: {
+        score: 12,
+        explanation:
+          "Instructions stay on-topic: OAuth setup with a client_secret.json, add an account and run Gmail/Calendar/Drive/Sheets/Docs commands. They require running a local CLI and providing OAuth credentials but do not instruct the agent to read unrelated system files or exfiltrate data.",
+      },
+      installMechanism: {
+        score: 40,
+        explanation:
+          "There is no install spec in the registry listing, yet SKILL.md metadata includes a Homebrew install entry (steipete/tap/gogcli). Installing a third-party Homebrew tap is moderately risky if you don't trust its source; the registry's omission of the install step is an incoherence.",
+      },
+      credentials: {
+        score: 30,
+        explanation:
+          "No environment variables or primary credentials are declared in the registry, but the SKILL.md requires OAuth credentials (client_secret.json) and suggests setting GOG_ACCOUNT. These are sensitive and the lack of declared credentials in the registry metadata is an omission.",
+      },
+      persistencePrivilege: {
+        score: 8,
+        explanation:
+          "The skill does not request always:true and does not declare persistent system-wide changes. It is user-invocable and allows autonomous invocation by default.",
+      },
+      summary:
+        "This skill appears to be a wrapper for the 'gog' CLI and legitimately needs OAuth credentials and a local binary. The SKILL.md and registry metadata disagree about install/requirements — ask the publisher to clarify.",
     },
-    downloads: 634,
-    rating: 4.3,
-    submissionMethod: "template",
+    downloads: 495,
+    rating: 4.6,
+    submissionMethod: "upload",
     submittedAt: "2026-02-01T09:00:00Z",
   },
   {
     id: "4",
-    title: "Infrastructure Drift Detector",
-    author: "Tom Williams",
-    version: "0.9.0",
-    description: "Detects configuration drift between IaC definitions and actual cloud infrastructure state.",
-    tags: ["devops", "infrastructure", "drift-detection"],
-    category: "DevOps",
-    markdownContent: `# Infrastructure Drift Detector
+    title: "Weather",
+    author: "steipete",
+    version: "1.0.0",
+    description:
+      "Get current weather and forecasts (no API key required).",
+    tags: ["weather", "curl", "api-free"],
+    category: "Productivity",
+    markdownContent: `# Weather
 
-## Goal
-Detect and report discrepancies between Infrastructure as Code definitions and the actual state of cloud resources.
+Two free services, no API keys needed.
 
-## When to Use
-- On a scheduled basis (daily/weekly)
-- Before applying infrastructure changes
-- After manual cloud console modifications
+## wttr.in (primary)
 
-## Input / Output
-**Input:** Terraform/CloudFormation state files, cloud provider API access
-**Output:** Drift report with affected resources, severity, and remediation steps
+Quick one-liner:
+\`\`\`bash
+curl -s "wttr.in/London?format=3"
+# Output: London: ⛅️ +8°C
+\`\`\`
 
-## Procedure
-1. Load the declared infrastructure state from IaC files
-2. Query cloud provider APIs for actual resource configurations
-3. Compare declared vs actual state for each resource
-4. Classify drifts by severity (cosmetic, functional, security)
-5. Generate remediation suggestions
-6. Alert on critical security-related drifts
+Full forecast:
+\`\`\`bash
+curl -s "wttr.in/London?T"
+\`\`\`
 
-## Verification
-- All resource types in the IaC should be checked
-- Drift detection must not modify any resources
-- Reports must include timestamps and resource identifiers`,
-    status: "pending",
+Tips:
+- URL-encode spaces: \`wttr.in/New+York\`
+- Units: \`?m\` (metric) \`?u\` (USCS)
+- PNG: \`curl -s "wttr.in/Berlin.png" -o /tmp/weather.png\`
+
+## Open-Meteo (fallback, JSON)
+
+\`\`\`bash
+curl -s "https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.12&current_weather=true"
+\`\`\`
+
+Docs: https://open-meteo.com/en/docs`,
+    status: "approved",
     evaluationScores: {
-      security: { score: 88, explanation: "Read-only cloud API access with no resource modification risk. No curl|bash patterns. Drift scans are non-destructive." },
-      credentials: { score: 72, explanation: "Requires cloud provider API keys. SKILL.md mentions environment variables but doesn't explicitly document which secret manager to use. Should clarify credential storage." },
-      compatibility: { score: 75, explanation: "Currently supports AWS and Terraform only. Azure and GCP support is planned but not yet implemented, limiting enterprise adoption. No sudo required." },
-      quality: { score: 82, explanation: "Good drift classification by severity. Remediation suggestions are helpful but lack automated fix options. Report format is clear." },
-      networkEgress: { score: 68, explanation: "Makes outbound API calls to cloud providers (AWS APIs). Endpoints are documented but the data sent in API requests (resource identifiers, account info) is not fully disclosed in SKILL.md." },
-      summary: "Promising DevOps skill with strong security posture. Limited cloud provider support and incomplete credential/network egress documentation are the main gaps.",
+      purposeCapability: {
+        score: 15,
+        explanation:
+          "Name/description claim 'no API key required' and the instructions call only to wttr.in and open-meteo (both free/no-key). However, SKILL.md metadata lists curl as a required binary while the registry metadata shows 'Required binaries: none' — a small inconsistency.",
+      },
+      instructionScope: {
+        score: 5,
+        explanation:
+          "SKILL.md only instructs making HTTP requests to wttr.in and open-meteo and saving an optional PNG to /tmp; it does not instruct reading unrelated files, accessing credentials, or sending data to unexpected endpoints.",
+      },
+      installMechanism: {
+        score: 5,
+        explanation:
+          "No install spec and no code files — instruction-only skill. This minimizes disk footprint and is appropriate for a curl-based weather helper.",
+      },
+      credentials: {
+        score: 3,
+        explanation:
+          "The skill requests no environment variables or credentials, which is proportionate to its function. (curl availability is the only operational dependency.)",
+      },
+      persistencePrivilege: {
+        score: 3,
+        explanation:
+          "always:false and no special persistence requested. The skill can be invoked autonomously by the agent per platform defaults, but it does not request elevated or permanent privileges.",
+      },
+      summary:
+        "This skill uses curl to fetch weather from wttr.in and Open-Meteo and does not request any keys or install software. Benign with high confidence.",
     },
-    downloads: 0,
-    rating: 0,
+    downloads: 344,
+    rating: 4.8,
     submissionMethod: "upload",
-    submittedAt: "2026-02-18T16:45:00Z",
+    submittedAt: "2026-01-15T10:30:00Z",
   },
   {
     id: "5",
-    title: "Sensitive Data Scanner",
-    author: "Elena Rodriguez",
-    version: "1.1.0",
-    description: "Scans codebases and configs for accidentally committed secrets, tokens, and PII.",
-    tags: ["security", "secrets", "compliance"],
-    category: "Security",
-    markdownContent: `# Sensitive Data Scanner
+    title: "Summarize",
+    author: "steipete",
+    version: "1.0.0",
+    description:
+      "Summarize URLs or files with the summarize CLI (web, PDFs, images, audio, YouTube).",
+    tags: ["summarize", "cli", "llm", "youtube"],
+    category: "Productivity",
+    markdownContent: `# Summarize
 
-## Goal
-Scan repositories for accidentally committed secrets, API tokens, passwords, and personally identifiable information.
+Fast CLI to summarize URLs, local files, and YouTube links.
 
-## When to Use
-- On every commit (pre-commit hook)
-- During CI/CD pipeline
-- For periodic full-repository audits
+## Quick start
+\`\`\`bash
+summarize "https://example.com" --model google/gemini-3-flash-preview
+summarize "/path/to/file.pdf" --model google/gemini-3-flash-preview
+summarize "https://youtu.be/dQw4w9WgXcQ" --youtube auto
+\`\`\`
 
-## Input / Output
-**Input:** Repository files, custom regex patterns, known secret formats
-**Output:** List of findings with file locations, severity, and recommended actions
+## Model + keys
+Set the API key for your chosen provider:
+- OpenAI: \`OPENAI_API_KEY\`
+- Anthropic: \`ANTHROPIC_API_KEY\`
+- xAI: \`XAI_API_KEY\`
+- Google: \`GEMINI_API_KEY\`
 
-## Procedure
-1. Scan all files against known secret patterns (AWS keys, JWT tokens, etc.)
-2. Check environment and config files for hardcoded credentials
-3. Detect PII patterns (emails, SSNs, phone numbers)
-4. Cross-reference with .gitignore to flag unignored sensitive files
-5. Generate findings report sorted by severity
-6. Suggest remediation (rotate key, add to .gitignore, etc.)
+## Useful flags
+- \`--length short|medium|long|xl|xxl|<chars>\`
+- \`--extract-only\` (URLs only)
+- \`--json\` (machine readable)
+- \`--firecrawl auto|off|always\` (fallback extraction)
+- \`--youtube auto\` (Apify fallback if \`APIFY_API_TOKEN\` set)
 
-## Verification
-- Must detect all OWASP-listed secret patterns
-- False positive rate below 10%
-- Should not flag properly encrypted values`,
+## Config
+Optional config file: \`~/.summarize/config.json\`
+Optional services: \`FIRECRAWL_API_KEY\`, \`APIFY_API_TOKEN\``,
     status: "approved",
     evaluationScores: {
-      security: { score: 97, explanation: "Excellent coverage of secret patterns including OWASP-listed formats. No unsafe execution, no eval or obfuscated scripts. Pre-commit hook integration prevents accidental commits." },
-      credentials: { score: 94, explanation: "Properly handles found credentials as read-only findings. Does not print, store, or transmit discovered secrets. Uses platform auth for repo access." },
-      compatibility: { score: 90, explanation: "Works across all major languages and CI/CD platforms. Custom regex pattern support enables organization-specific rules. Minor gaps in binary file scanning. No privileged access needed." },
-      quality: { score: 93, explanation: "Thorough procedure with clear severity classification. Remediation suggestions are actionable. Low false-positive target (under 10%) is well-defined and achievable." },
-      networkEgress: { score: 96, explanation: "Purely local scanning operation. No outbound network calls. Findings report stays local and is not transmitted to any external service." },
-      summary: "Outstanding security skill with near-perfect detection capabilities. The gold standard for secret scanning in enterprise environments.",
+      purposeCapability: {
+        score: 18,
+        explanation:
+          "The name/description (summarize URLs/files/YouTube) matches what the instructions do: call the external 'summarize' CLI and send content to LLM providers. However, registry metadata listed no required binaries while the SKILL.md metadata declares a required 'summarize' binary — a mismatch.",
+      },
+      instructionScope: {
+        score: 8,
+        explanation:
+          "Runtime instructions simply show how to invoke the summarize CLI, specify provider API keys, and optional fallback tokens (FIRECRAWL/APIFY). The SKILL.md does not instruct the agent to read unrelated files or system credentials.",
+      },
+      installMechanism: {
+        score: 28,
+        explanation:
+          "There is no packaged install in the registry, but the SKILL.md metadata suggests installing a brew formula from steipete/tap/summarize. Installing from a third-party brew tap is common but carries more trust risk than an official formula.",
+      },
+      credentials: {
+        score: 12,
+        explanation:
+          "Requested environment variables are API keys for LLM providers (OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.) and optional service keys (FIRECRAWL_API_KEY, APIFY_API_TOKEN). These are proportionate to a tool that extracts content and forwards it to models.",
+      },
+      persistencePrivilege: {
+        score: 5,
+        explanation:
+          "Skill is instruction-only, does not request permanent presence (always:false), and does not claim to modify other skills or system-wide settings.",
+      },
+      summary:
+        "This skill is an instruction-only wrapper that expects the external 'summarize' CLI. Benign with high confidence. Ensure you trust the brew tap source before installing.",
     },
-    downloads: 2103,
-    rating: 4.9,
-    submissionMethod: "template",
+    downloads: 463,
+    rating: 4.7,
+    submissionMethod: "upload",
     submittedAt: "2026-01-10T08:00:00Z",
   },
   {
     id: "6",
-    title: "Meeting Notes Summarizer",
-    author: "David Kim",
-    version: "1.0.0",
-    description: "Summarizes meeting transcripts into action items, decisions, and key discussion points.",
-    tags: ["communication", "summarization", "meetings"],
+    title: "Twitter",
+    author: "blueberrywoodsym",
+    version: "1.0.6",
+    description:
+      "Write viral, persuasive, engaging tweets and threads. Uses web research to find viral examples in your niche, then models writing based on proven formulas.",
+    tags: ["twitter", "x", "social-media", "copywriting"],
     category: "Communication",
-    markdownContent: `# Meeting Notes Summarizer
+    markdownContent: `# Tweet Writer Skill
 
-## Goal
-Transform meeting transcripts into structured summaries with action items, decisions made, and key discussion points.
+## Overview
+This skill helps you write viral, persuasive tweets and threads optimized for X's algorithm. It combines proven copywriting frameworks, viral hook formulas, and real-time research.
 
-## When to Use
-- After any recorded meeting
-- When processing meeting backlog
-- For generating weekly team summaries
+## Process Workflow
 
-## Input / Output
-**Input:** Meeting transcript (text or audio file)
-**Output:** Structured summary with sections for decisions, action items (with owners), and discussion highlights
+### Phase 1: Niche Research (CRITICAL)
+Before writing ANY tweet, research viral examples in the user's specific niche using WebSearch.
 
-## Procedure
-1. Parse transcript and identify speakers
-2. Extract explicit decisions ("we decided to...")
-3. Identify action items and assign owners
-4. Summarize key discussion topics
-5. Flag unresolved questions or parking lot items
-6. Format output with consistent structure
+### Phase 2: Tweet Creation
+Use frameworks: Bold Statement, Specific Result, Curiosity Gap, Question Hook.
 
-## Verification
-- All action items must have an assigned owner
-- Decisions must be clearly stated, not implied
-- Summary should be under 20% of original transcript length`,
-    status: "pending",
+## The X Algorithm (2026)
+### Engagement Hierarchy
+1. Replies — Most weighted signal
+2. Quote tweets — High value
+3. Bookmarks — Strong signal of value
+4. Retweets — Amplification
+5. Likes — Baseline
+
+### Tips
+- First hour is critical for traction
+- Threads naturally increase dwell time
+- Native video gets priority over external links
+- Avoid asking for engagement ("Like and RT" hurts reach)`,
+    status: "approved",
     evaluationScores: {
-      security: { score: 70, explanation: "Processes potentially sensitive meeting content. Lacks explicit sandboxing for transcript parsing. No injection vectors but PII handling is not addressed." },
-      credentials: { score: 85, explanation: "No credential handling in the skill itself. However, accessing meeting recordings may require platform tokens—not documented." },
-      compatibility: { score: 85, explanation: "Supports text transcripts from major platforms (Zoom, Teams, Meet). Audio file support is limited. No sudo or system modifications required." },
-      quality: { score: 80, explanation: "Action item extraction is reliable but decision identification could be more nuanced. Summary length constraint is well-defined." },
-      networkEgress: { score: 65, explanation: "May need to access meeting platform APIs to fetch transcripts. Endpoints and data transmitted are not documented in SKILL.md. Needs clarification on what data leaves the system." },
-      summary: "Useful communication skill with room for improvement in security (PII handling) and network egress documentation.",
+      purposeCapability: {
+        score: 5,
+        explanation:
+          "Name/description (tweet/threads authoring) aligns with the SKILL.md: all instructions describe researching viral examples and applying copy frameworks. The skill does not ask for unrelated credentials or binaries.",
+      },
+      instructionScope: {
+        score: 5,
+        explanation:
+          "Runtime instructions only direct the agent to perform web searches, analyze public tweets, and craft copy. They do not ask the agent to read local files, access unrelated env vars, or transmit data to third-party endpoints.",
+      },
+      installMechanism: {
+        score: 3,
+        explanation:
+          "No install spec or code files are provided (instruction-only). Nothing will be downloaded or written to disk by the skill itself.",
+      },
+      credentials: {
+        score: 3,
+        explanation:
+          "The skill declares no required environment variables, credentials, or config paths. That is proportional to the stated purpose (writing and web research).",
+      },
+      persistencePrivilege: {
+        score: 3,
+        explanation:
+          "always is false and model invocation is not disabled (normal defaults). The skill does not request persistent privileges or attempt to modify other skills.",
+      },
+      summary:
+        "This is an instruction-only skill that coherently documents how to research and write viral X/Twitter content and requests no installs, credentials, or system access. Benign with high confidence.",
     },
-    downloads: 0,
-    rating: 0,
-    submissionMethod: "template",
+    downloads: 3,
+    rating: 4.0,
+    submissionMethod: "upload",
     submittedAt: "2026-02-19T11:30:00Z",
   },
   {
     id: "7",
-    title: "Data Pipeline Validator",
-    author: "Priya Sharma",
-    version: "1.3.0",
-    description: "Validates data pipeline configurations and checks for data quality issues before deployment.",
-    tags: ["data", "validation", "pipeline"],
-    category: "Data Analysis",
-    markdownContent: `# Data Pipeline Validator
+    title: "Outlook",
+    author: "byungkyu",
+    version: "1.0.3",
+    description:
+      "Microsoft Outlook API integration with managed OAuth. Read, send, and manage emails, folders, calendar events, and contacts via Microsoft Graph.",
+    tags: ["outlook", "email", "calendar", "microsoft", "oauth"],
+    category: "Productivity",
+    markdownContent: `# Outlook
 
-## Goal
-Validate data pipeline configurations and perform pre-deployment data quality checks to prevent bad data from reaching production.
+Access the Microsoft Outlook API (via Microsoft Graph) with managed OAuth authentication. Read, send, and manage emails, folders, calendar events, and contacts.
 
-## When to Use
-- Before deploying pipeline changes
-- When adding new data sources
-- During scheduled data quality audits
+## Quick Start
+\`\`\`bash
+# Get user profile
+python <<'EOF'
+import urllib.request, os, json
+req = urllib.request.Request('https://gateway.maton.ai/outlook/v1.0/me')
+req.add_header('Authorization', f'Bearer {os.environ["MATON_API_KEY"]}')
+print(json.dumps(json.load(urllib.request.urlopen(req)), indent=2))
+EOF
+\`\`\`
 
-## Input / Output
-**Input:** Pipeline configuration files, sample data, schema definitions
-**Output:** Validation report with pass/fail status, data quality metrics, and recommendations
+## Base URL
+\`https://gateway.maton.ai/outlook/{native-api-path}\`
 
-## Procedure
-1. Parse pipeline configuration for structural validity
-2. Validate schema definitions against source data
-3. Run data quality checks (nulls, duplicates, range violations)
-4. Test transformation logic with sample data
-5. Verify output schema matches downstream expectations
-6. Generate comprehensive validation report
+## Authentication
+All requests require: \`Authorization: Bearer $MATON_API_KEY\`
 
-## Verification
-- All schema mismatches must be detected
-- Data quality thresholds must be configurable
-- Report must include sample failing records`,
+## Connection Management
+Manage your Microsoft OAuth connections at \`https://ctrl.maton.ai\`.`,
     status: "approved",
     evaluationScores: {
-      security: { score: 82, explanation: "Data validation is properly sandboxed. No write operations on production data. No eval or arbitrary command execution detected." },
-      credentials: { score: 88, explanation: "Database connection strings should use environment variables. Skill does not print credentials but doesn't explicitly mandate secret managers." },
-      compatibility: { score: 91, explanation: "Supports common pipeline frameworks (Airflow, dbt, Spark). Schema format support is broad. No privileged access or system modifications required." },
-      quality: { score: 89, explanation: "Comprehensive validation checks with configurable thresholds. Sample failing records in reports are very useful for debugging." },
-      networkEgress: { score: 86, explanation: "Connects to configured data sources for validation. All endpoints are expected to be internal. No external uploads or telemetry detected." },
-      summary: "Well-rounded data quality skill with strong compatibility across pipeline frameworks. Security and quality are both solid.",
+      purposeCapability: {
+        score: 8,
+        explanation:
+          "The name/description say Microsoft Graph (Outlook) via a managed OAuth gateway, and the skill only requires MATON_API_KEY and references maton endpoints. There are no unrelated env vars, binaries, or install steps.",
+      },
+      instructionScope: {
+        score: 8,
+        explanation:
+          "SKILL.md contains explicit HTTP examples using the Maton gateway and only references the MATON_API_KEY environment variable. It does not instruct reading unrelated files or other environment variables.",
+      },
+      installMechanism: {
+        score: 3,
+        explanation:
+          "Instruction-only skill with no install spec and no code files — nothing is written to disk or pulled from external URLs during install.",
+      },
+      credentials: {
+        score: 10,
+        explanation:
+          "Only one required environment variable (MATON_API_KEY) is declared and used. This is proportionate to a gateway-based OAuth integration, but the key is sensitive because it grants access to email/calendar/contacts via Maton.",
+      },
+      persistencePrivilege: {
+        score: 15,
+        explanation:
+          "Skill does not set always:true (good) but also does not set disableModelInvocation, so by default the model could call the skill autonomously if the key is present in the agent environment.",
+      },
+      summary:
+        "This skill appears internally consistent: it proxies Microsoft Graph through Maton and needs a single MATON_API_KEY. Benign with high confidence.",
     },
-    downloads: 456,
-    rating: 4.4,
+    downloads: 8,
+    rating: 4.1,
     submissionMethod: "upload",
     submittedAt: "2026-01-25T13:00:00Z",
   },
   {
     id: "8",
-    title: "Changelog Composer",
-    author: "Alex Turner",
-    version: "0.5.0",
-    description: "Generates changelogs from git commits and PR descriptions following Keep a Changelog format.",
-    tags: ["documentation", "changelog", "git"],
-    category: "Documentation",
-    markdownContent: `# Changelog Composer
+    title: "Ontology",
+    author: "oswalpalash",
+    version: "0.1.2",
+    description:
+      "Typed knowledge graph for structured agent memory and composable skills. Use when creating/querying entities, linking related objects, enforcing constraints, or when skills need to share state.",
+    tags: ["knowledge-graph", "memory", "ontology", "agent"],
+    category: "Data & Knowledge",
+    markdownContent: `# Ontology
 
-## Goal
-Automatically generate well-formatted changelogs from git commit history and pull request descriptions.
+A typed vocabulary + constraint system for representing knowledge as a verifiable graph.
+
+## Core Concept
+Everything is an **entity** with a **type**, **properties**, and **relations** to other entities.
+
+\`\`\`
+Entity: { id, type, properties, relations, created, updated }
+Relation: { from_id, relation_type, to_id, properties }
+\`\`\`
 
 ## When to Use
-- Before each release
-- Weekly for continuous deployment projects
-- When preparing release notes
+| Trigger | Action |
+|---------|--------|
+| "Remember that..." | Create/update entity |
+| "What do I know about X?" | Query graph |
+| "Link X to Y" | Create relation |
+| Planning multi-step work | Model as graph transformations |
 
-## Input / Output
-**Input:** Git commit log, merged PR descriptions, previous changelog
-**Output:** Formatted changelog following Keep a Changelog specification
+## Core Types
+Person, Organization, Project, Task, Goal, Event, Location, Document, Message, Note, Account, Credential (secret_ref only), Action, Policy.
 
-## Procedure
-1. Fetch commits since last release tag
-2. Parse conventional commit messages
-3. Group changes by type (Added, Changed, Fixed, Removed)
-4. Enrich entries with PR descriptions where available
-5. Format according to Keep a Changelog spec
-6. Append to existing CHANGELOG.md
+## Storage
+Default: \`memory/ontology/graph.jsonl\` (append-only JSONL)
 
-## Verification
-- All commits since last tag must be represented
-- Categories must follow conventional commit types
-- Breaking changes must be prominently highlighted`,
-    status: "rejected",
+## Workflows
+\`\`\`bash
+python3 scripts/ontology.py create --type Person --props '{"name":"Alice"}'
+python3 scripts/ontology.py query --type Task --where '{"status":"open"}'
+python3 scripts/ontology.py relate --from proj_001 --rel has_task --to task_001
+python3 scripts/ontology.py validate
+\`\`\``,
+    status: "approved",
     evaluationScores: {
-      security: { score: 65, explanation: "Git history access is read-only but lacks authentication safeguards for private repositories. No input validation for commit messages that could contain injection payloads." },
-      credentials: { score: 58, explanation: "Private repo access credentials are not documented. Unclear whether Git tokens are handled via env vars or passed directly. Over-requests repo access scope." },
-      compatibility: { score: 60, explanation: "Only supports conventional commit format. Repositories using other commit conventions will produce incomplete changelogs. Limited to Git-based workflows." },
-      quality: { score: 55, explanation: "Procedure lacks error handling for non-conventional commits. No fallback strategy for malformed commit messages. Breaking change detection is unreliable." },
-      networkEgress: { score: 50, explanation: "Fetches data from Git remotes but documentation doesn't specify which endpoints are accessed. Potential to leak commit metadata if changelog is posted to external services." },
-      summary: "Below quality threshold. Credential handling is unclear, commit convention assumptions are too rigid, and network egress behavior is insufficiently documented.",
+      purposeCapability: {
+        score: 8,
+        explanation:
+          "Name/description (typed knowledge graph for agent memory) align with the included SKILL.md and the Python script: it implements entity CRUD, relations, queries, validation, and a local append-only JSONL storage.",
+      },
+      instructionScope: {
+        score: 18,
+        explanation:
+          "Runtime instructions operate on a local graph file and describe migrations to SQLite; they do not instruct network calls or secret exfiltration. The docs do reference local file paths and secret references — storing paths/metadata is expected, but be aware other skills that read the ontology could access those paths.",
+      },
+      installMechanism: {
+        score: 5,
+        explanation:
+          "No install spec; the skill is instruction-only with an included script. Nothing is downloaded or executed during install, so install risk is low.",
+      },
+      credentials: {
+        score: 5,
+        explanation:
+          "The skill requests no environment variables, no credentials, and no config paths. The schema explicitly forbids storing secrets directly (uses secret_ref), which is appropriate.",
+      },
+      persistencePrivilege: {
+        score: 5,
+        explanation:
+          "always:false and normal model invocation settings. The skill writes only to its own graph storage (by default under memory/ontology) and does not attempt to install itself or elevate privileges.",
+      },
+      summary:
+        "This skill appears coherent for a local, file-backed ontology used as agent memory. Benign with medium confidence — a quick code review is recommended to confirm safe path handling.",
     },
-    downloads: 0,
-    rating: 0,
+    downloads: 19,
+    rating: 4.3,
     submissionMethod: "upload",
-    submittedAt: "2026-02-10T15:00:00Z",
-    adminNotes: "Multiple evaluation categories below threshold. Credential handling and network egress documentation need significant work. Please revise and resubmit.",
+    submittedAt: "2026-02-15T16:45:00Z",
   },
 ];

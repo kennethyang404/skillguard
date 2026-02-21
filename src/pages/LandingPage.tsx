@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
-  Shield,
-  Puzzle,
-  Sparkles,
+  Target,
+  BookOpen,
+  Package,
   ArrowRight,
   Cpu,
   CheckCircle2,
@@ -14,59 +14,59 @@ import {
   Eye,
   Layers,
   GitBranch,
-  Package,
+  FileSearch,
   KeyRound,
-  Network,
+  Binary,
 } from "lucide-react";
 
 const methodologySteps = [
   {
     number: "01",
-    title: "Submission & Parsing",
+    title: "Parse & Validate",
     description:
       "Skills are submitted as SKILL.md files with optional bash scripts. Our parser validates the markdown AST, extracts metadata, and normalizes all content for downstream analysis.",
-    icon: Package,
+    icon: FileSearch,
   },
   {
     number: "02",
-    title: "Security & Safety Scan",
+    title: "Purpose & Capability",
     description:
-      "Scans for curl|bash patterns, prompt injection vulnerabilities, obfuscated scripts (base64, eval), unsafe command execution, and remote code download patterns across the entire skill definition.",
-    icon: Shield,
+      "Compares name and description to the actual SKILL.md actions and bash behavior. Flags undeclared binaries, env vars, or install steps that don't match the registry metadata.",
+    icon: Target,
   },
   {
     number: "03",
-    title: "Credential Handling Review",
+    title: "Instruction Scope",
     description:
-      "Checks whether the skill asks users to paste API keys into chat or CLI history, verifies proper use of environment variables and secret managers, and detects credentials printed to stdout or sent over the network.",
-    icon: KeyRound,
+      "Verifies runtime instructions stay on-topic — no reading unrelated files, accessing unexpected env vars, or directing data to endpoints beyond the stated purpose.",
+    icon: BookOpen,
   },
   {
     number: "04",
-    title: "Enterprise Compatibility Check",
+    title: "Install Mechanism",
     description:
-      "Verifies the skill doesn't require sudo/root, modify system configs, install daemons, or assume consumer services. Ensures it runs in locked-down corporate environments with proxy and cert pinning constraints.",
-    icon: Puzzle,
+      "Assesses disk and download risk. Flags third-party taps, unverified binary sources, and mismatches between registry-declared installs and what the SKILL.md actually requires.",
+    icon: Package,
   },
   {
     number: "05",
-    title: "Quality & Capability Assessment",
+    title: "Credentials",
     description:
-      "Evaluates persona scope definition, constraint clarity, instruction-to-code alignment, and whether the skill follows corporate best practices like auditable steps and safe defaults.",
-    icon: Sparkles,
+      "Checks whether secrets are pasted into chat/CLI history, verifies proper use of env vars and secret managers, detects credentials printed to stdout or sent over the network, and validates credential scope minimization.",
+    icon: KeyRound,
   },
   {
     number: "06",
-    title: "Network Egress & Data Disclosure",
+    title: "Persistence & Privilege",
     description:
-      "Enumerates all outbound network actions (curl, wget, cloud CLIs, webhooks), classifies each as download-only vs upload/send, and verifies SKILL.md documents all endpoints, data sent, and justification.",
-    icon: Network,
+      "Detects sudo/root requirements, system config modifications, daemon installs, always-on flags, and autonomous invocation risks that could widen the agent's attack surface.",
+    icon: Lock,
   },
   {
     number: "07",
-    title: "Human Review & Approval",
+    title: "Report & Human Review",
     description:
-      "Admin reviewers receive a detailed evaluation report with per-section severity scores (0–100), explanations, and flagged concerns. They can approve, reject, or request revisions with full context.",
+      "Aggregates severity scores (0–100) across all five categories. Admin reviewers receive a detailed report with per-section explanations and can approve, reject, or request revisions.",
     icon: Eye,
   },
 ];
@@ -200,11 +200,11 @@ const LandingPage = () => {
               <div>
                 <h3 className="font-semibold mb-1">Severity Scoring (0–100)</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Each of the five evaluation categories produces an independent severity score: <strong>0–10</strong> minimal risk,{" "}
-                  <strong>11–25</strong> low risk, <strong>26–45</strong> moderate risk, <strong>46–65</strong> high risk,{" "}
-                  <strong>66–85</strong> very high risk, <strong>86–100</strong> critical. Skills must achieve passing scores across{" "}
-                  <strong>all five categories</strong> — Security & Safety, Credential Handling, Enterprise Compatibility,
-                  Quality & Capability, and Network Egress — to be eligible for approval.
+                  Each of the five evaluation categories produces an independent severity score where <strong>higher means more risk</strong>:{" "}
+                  <strong>0–10</strong> minimal risk, <strong>11–25</strong> low risk, <strong>26–45</strong> moderate risk,{" "}
+                  <strong>46–65</strong> high risk, <strong>66–85</strong> very high risk, <strong>86–100</strong> critical.{" "}
+                  Skills are evaluated across <strong>all five categories</strong> — Purpose & Capability, Instruction Scope,
+                  Install Mechanism, Credentials, and Persistence & Privilege — before human reviewers make the final call.
                 </p>
               </div>
             </div>

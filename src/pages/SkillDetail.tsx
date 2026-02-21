@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Star, Shield, Puzzle, Sparkles, FileText, KeyRound, Network } from "lucide-react";
+import { ArrowLeft, Download, Star, Target, BookOpen, Package, KeyRound, Lock, FileText } from "lucide-react";
+import { getSeverityColor, getSeverityLabel } from "@/lib/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
@@ -18,11 +19,11 @@ const statusColors: Record<string, string> = {
 };
 
 const EVAL_ICONS: Record<string, React.ElementType> = {
-  security: Shield,
+  purposeCapability: Target,
+  instructionScope: BookOpen,
+  installMechanism: Package,
   credentials: KeyRound,
-  compatibility: Puzzle,
-  quality: Sparkles,
-  networkEgress: Network,
+  persistencePrivilege: Lock,
 };
 
 const SkillDetail = () => {
@@ -60,10 +61,10 @@ const SkillDetail = () => {
     icon: EVAL_ICONS[key],
   }));
 
-  const overallScore = Math.round(
+  const avgSeverity = Math.round(
     evalItems.reduce((sum, item) => sum + getScore(item.val), 0) / evalItems.length
   );
-  const overallColor = overallScore >= 90 ? "text-emerald-600" : overallScore >= 70 ? "text-amber-600" : "text-red-600";
+  const overallColor = getSeverityColor(avgSeverity);
 
   return (
     <div>
@@ -97,7 +98,7 @@ const SkillDetail = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Score Breakdown</CardTitle>
-                <span className={`text-lg font-bold ${overallColor}`}>{overallScore}/100</span>
+                <span className={`text-lg font-bold ${overallColor}`}>Avg Severity: {avgSeverity}/100</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -113,7 +114,7 @@ const SkillDetail = () => {
                 const Icon = item.icon;
                 const score = getScore(item.val);
                 const explanation = getExplanation(item.val);
-                const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : "text-red-600";
+                const color = getSeverityColor(score);
                 return (
                   <div key={item.key} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
@@ -121,7 +122,7 @@ const SkillDetail = () => {
                         <Icon className="h-4 w-4 text-muted-foreground" />
                         {item.label}
                       </span>
-                      <span className={`font-semibold ${color}`}>{score}/100</span>
+                      <span className={`font-semibold ${color}`}>{score}/100 · {getSeverityLabel(score)}</span>
                     </div>
                     <Progress value={score} className="h-2" />
                     {explanation && (

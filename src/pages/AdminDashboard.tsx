@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Skill, SkillStatus } from "@/lib/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { Shield, Puzzle, Sparkles, Check, X, KeyRound, Network } from "lucide-react";
+import { Target, BookOpen, Package, Check, X, KeyRound, Lock } from "lucide-react";
+import { getSeverityColor, getSeverityLabel } from "@/lib/types";
 import { EvaluationPipeline } from "@/components/EvaluationPipeline";
 
 const statusColors: Record<string, string> = {
@@ -22,11 +23,11 @@ const statusColors: Record<string, string> = {
 };
 
 const EVAL_ICONS: Record<string, React.ElementType> = {
-  security: Shield,
+  purposeCapability: Target,
+  instructionScope: BookOpen,
+  installMechanism: Package,
   credentials: KeyRound,
-  compatibility: Puzzle,
-  quality: Sparkles,
-  networkEgress: Network,
+  persistencePrivilege: Lock,
 };
 
 const AdminDashboard = () => {
@@ -164,8 +165,8 @@ const AdminDashboard = () => {
                       {(() => {
                         const scores = EVALUATION_KEYS.map((k) => getScore(selectedSkill.evaluationScores[k]));
                         const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-                        const c = avg >= 90 ? "text-emerald-600" : avg >= 70 ? "text-amber-600" : avg > 0 ? "text-red-600" : "text-muted-foreground";
-                        return <span className={`text-sm font-bold ${c}`}>{avg > 0 ? `${avg}/100` : "Pending"}</span>;
+                        const c = avg > 0 ? getSeverityColor(avg) : "text-muted-foreground";
+                        return <span className={`text-sm font-bold ${c}`}>{avg > 0 ? `Avg: ${avg}/100` : "Pending"}</span>;
                       })()}
                     </div>
                   </CardHeader>
@@ -180,12 +181,12 @@ const AdminDashboard = () => {
                       const val = selectedSkill.evaluationScores[key];
                       const score = getScore(val);
                       const explanation = getExplanation(val);
-                      const color = score >= 90 ? "text-emerald-600" : score >= 70 ? "text-amber-600" : score > 0 ? "text-red-600" : "text-muted-foreground";
+                      const color = score > 0 ? getSeverityColor(score) : "text-muted-foreground";
                       return (
                         <div key={key} className="space-y-1.5">
                           <div className="flex justify-between text-sm">
                             <span className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-muted-foreground" />{EVALUATION_LABELS[key]}</span>
-                            <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100` : "Pending"}</span>
+                            <span className={`font-semibold ${color}`}>{score > 0 ? `${score}/100 · ${getSeverityLabel(score)}` : "Pending"}</span>
                           </div>
                           <Progress value={score} className="h-2" />
                           {explanation && (
